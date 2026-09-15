@@ -523,14 +523,23 @@ button {
   z-index: 3;
 }
 
+/* One shared glass panel wraps the product AND its addon tiles — matches
+   Figma's "Question panel (glass)" treatment applied to node 44:760. */
 .product-zone-row {
   display: flex;
   align-items: flex-start;
   gap: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--glass-panel-bg);
+  border: 1px solid var(--glass-panel-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  padding: 28px;
 }
 
 .product-col {
-  width: 340px;
+  width: 320px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -540,19 +549,13 @@ button {
 
 .product-picture {
   width: 100%;
-  height: 520px;
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: var(--glass-panel-bg);
-  border: 1px solid var(--glass-panel-border);
-  box-shadow: var(--shadow-panel);
+  height: 490px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  padding: 32px 24px;
 }
 .product-img {
   position: relative;
@@ -594,7 +597,7 @@ button {
   flex-direction: column;
   gap: 16px;
   flex-shrink: 0;
-  padding-top: 8px;
+  justify-content: center;
 }
 
 .addon-tile {
@@ -657,12 +660,14 @@ button {
   position: static;
   margin: 4px auto 8px;
 }
+.product-preview--summary .product-zone-row {
+  padding: 16px;
+}
 .product-preview--summary .product-col {
   width: 220px;
 }
 .product-preview--summary .product-picture {
-  height: 260px;
-  padding: 20px 16px;
+  height: 240px;
 }
 
 /* ---------------- Bottom bar ---------------- */
@@ -765,12 +770,12 @@ button {
   border: 1px solid var(--glass-panel-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-panel);
-  padding: 32px;
-  width: 1100px;
-  max-width: 100%;
+  padding: 28px;
+  width: 782px;
+  max-width: calc(100% - 340px);
   height: 600px;
   display: flex;
-  gap: 28px;
+  gap: 20px;
 }
 
 .refine-controls {

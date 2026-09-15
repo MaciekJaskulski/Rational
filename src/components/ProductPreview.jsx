@@ -1,17 +1,14 @@
 import { motion } from "framer-motion";
 import { useAppState, useRecommendation } from "../state/store";
 import { PRODUCT_IMAGES, PRODUCT_IMAGE_FALLBACK, ACCESSORY_IMAGES, slugify } from "../assets/images";
-import { ACCESSORIES_BY_FOCUS } from "../data/accessories";
 
-function getAddonTiles(rec, focusId, accessories) {
-  const tiles = [];
-  if (rec.rack) tiles.push({ id: "rack", label: rec.rack, slug: slugify(rec.rack) });
-  const extra = accessories.length > 0 ? accessories : (ACCESSORIES_BY_FOCUS[focusId] || []).slice(0, 1);
-  extra.forEach((a) => {
-    const slug = slugify(a.label);
-    if (!tiles.find((t) => t.slug === slug)) tiles.push({ id: a.id, label: a.label, slug });
-  });
-  return tiles.slice(0, 3);
+// Only these get a tile — matches the asset set we actually have.
+const ADDON_ALLOWLIST = ["Mobile stand", "Fixed stand", "Standard GN rack", "Banquet rack", "Bakery rack"];
+
+function getAddonTiles(rec) {
+  return [rec.stand, rec.rack]
+    .filter((label) => label && ADDON_ALLOWLIST.includes(label))
+    .map((label) => ({ id: label, label, slug: slugify(label) }));
 }
 
 export default function ProductPreview({ variant, force }) {
@@ -23,8 +20,8 @@ export default function ProductPreview({ variant, force }) {
   const name = rec.gridSize ? `${rec.line} ${rec.gridSize}` : rec.line;
   const sub = rec.rack || "Rack — pending";
   const image = PRODUCT_IMAGES[rec.gridSize] || PRODUCT_IMAGE_FALLBACK;
-  const showAddons = variant !== "summary";
-  const addons = showAddons ? getAddonTiles(rec, state.answers.focus, state.accessories) : [];
+  const showAddons = variant === "refine";
+  const addons = showAddons ? getAddonTiles(rec) : [];
 
   return (
     <motion.div

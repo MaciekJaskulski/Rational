@@ -26,7 +26,7 @@ export default function RefineScreen() {
   }
 
   return (
-    <div className="center-screen">
+    <div className="content-row">
       <div className="refine-panel">
         <div className="refine-controls">
           <div className="step-label">STEP 5 OF 6 — REFINE &amp; ACCESSORIES</div>

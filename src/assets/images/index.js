@@ -1,4 +1,4 @@
-import demoCanvas from "./bg/demo-canvas2.png";
+import demoCanvas from "./bg/demo-canvas3.png";
 import icombiPro6 from "./products/icombi-pro-6-1.png";
 import icombiPro10 from "./products/icombi-pro-10-1.png";
 import icombiPro20 from "./products/icombi-pro-20-1.png";

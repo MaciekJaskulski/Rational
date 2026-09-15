@@ -1,4 +1,5 @@
 import { useAppState, useAppDispatch, useRecommendation } from "../state/store";
+import ProductPreview from "./ProductPreview";
 
 export default function SummaryScreen() {
   const state = useAppState();
@@ -21,6 +22,7 @@ export default function SummaryScreen() {
         <h1 className="q-title" style={{ fontSize: 26 }}>
           {rec.line}, {rec.gridSize}
         </h1>
+        <ProductPreview variant="summary" force />
         <div className="summary-list">
           <span className="chip active">Model: {rec.gridSize}</span>
           <span className="chip">Power: {powerLabel}</span>

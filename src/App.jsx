@@ -12,6 +12,7 @@ function Screen() {
   return (
     <div className="stage">
       <img className="bg-canvas" src={BG_CANVAS} alt="" />
+      <div className="bg-canvas-scrim" />
       <div className="app-frame">
         <Header />
 

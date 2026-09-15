@@ -16,7 +16,7 @@ export default function SummaryScreen() {
   const powerLabel = state.answers.power === "gas" ? "gas" : state.answers.power === "electric" ? "electric" : "power TBD";
 
   return (
-    <div className="center-screen">
+    <div className="summary-screen">
       <div className="summary-panel">
         <div className="step-label">STEP 6 OF 6 — SUMMARY</div>
         <h1 className="q-title" style={{ fontSize: 26 }}>

@@ -20,13 +20,14 @@ export default function ProductPreview({ variant, force }) {
   const name = rec.gridSize ? `${rec.line} ${rec.gridSize}` : rec.line;
   const sub = rec.rack || "Rack — pending";
   const image = PRODUCT_IMAGES[rec.gridSize] || PRODUCT_IMAGE_FALLBACK;
-  const showAddons = variant === "refine";
+  const isSummary = variant === "summary";
+  const showAddons = variant === "refine" || isSummary;
   const addons = showAddons ? getAddonTiles(rec) : [];
 
   return (
     <motion.div
-      className={`product-preview ${variant === "summary" ? "product-preview--summary" : ""}`}
-      initial={{ opacity: 0, x: variant === "summary" ? 0 : 24, y: variant === "summary" ? 16 : 0 }}
+      className={`product-preview ${isSummary ? "product-preview--summary" : ""}`}
+      initial={{ opacity: 0, x: isSummary ? 0 : 24, y: isSummary ? 16 : 0 }}
       animate={{ opacity: 1, x: 0, y: 0 }}
       transition={{ duration: 0.35 }}
     >
@@ -35,10 +36,12 @@ export default function ProductPreview({ variant, force }) {
           <div className="product-picture">
             <img key={image} src={image} alt={name} className="product-img" />
           </div>
-          <div className="product-tag">
-            <span className="tag-name">{name}</span>
-            <span className="tag-sub">{sub}</span>
-          </div>
+          {!isSummary && (
+            <div className="product-tag">
+              <span className="tag-name">{name}</span>
+              <span className="tag-sub">{sub}</span>
+            </div>
+          )}
         </div>
 
         {addons.length > 0 && (
@@ -50,7 +53,7 @@ export default function ProductPreview({ variant, force }) {
                   <div className="addon-picture">
                     {img ? <img src={img} alt={addon.label} className="addon-img" /> : <div className="addon-placeholder" aria-hidden="true" />}
                   </div>
-                  <div className="addon-tag">{addon.label}</div>
+                  {!isSummary && <div className="addon-tag">{addon.label}</div>}
                 </div>
               );
             })}

@@ -667,7 +667,18 @@ button {
   width: 220px;
 }
 .product-preview--summary .product-picture {
-  height: 240px;
+  height: 200px;
+}
+.product-preview--summary .addons-column {
+  gap: 10px;
+}
+.product-preview--summary .addon-tile {
+  width: 84px;
+}
+.product-preview--summary .addon-picture {
+  width: 84px;
+  height: 78px;
+  padding: 6px;
 }
 
 /* ---------------- Bottom bar ---------------- */
@@ -761,6 +772,20 @@ button {
   justify-content: center;
   margin-top: 16px;
   margin-bottom: 84px;
+}
+
+/* Summary has no bottom bar and can run tall (product + addons included),
+   so it's top-anchored with room to clear the header instead of centered
+   (centering an overflowing box pushes it up, under the header). */
+.summary-screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  overflow-y: auto;
 }
 
 .refine-panel {

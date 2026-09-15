@@ -65,8 +65,8 @@ button {
 
 /* ---------------- Glass shared ---------------- */
 .glass {
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   background: var(--glass-header-bg);
   border: 1px solid var(--glass-header-border);
   border-radius: var(--radius-md);
@@ -183,6 +183,7 @@ button {
   top: 26px;
   right: 0;
   background: rgba(30, 30, 30, 0.95);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
@@ -237,8 +238,8 @@ button {
 
 /* ---------------- Question panel ---------------- */
 .question-panel {
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   background: var(--glass-panel-bg);
   border: 1px solid var(--glass-panel-border);
   border-radius: var(--radius-lg);
@@ -367,8 +368,8 @@ button {
 
 /* ---------------- Chat panel ---------------- */
 .chat-panel {
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   background: var(--glass-chat-bg);
   border: 1px solid var(--glass-chat-border);
   border-radius: var(--radius-sm);
@@ -529,8 +530,8 @@ button {
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   background: var(--glass-panel-bg);
   border: 1px solid var(--glass-panel-border);
   border-radius: var(--radius-lg);
@@ -568,8 +569,8 @@ button {
 
 .product-tag {
   margin-top: -25px;
-  backdrop-filter: blur(9px);
   -webkit-backdrop-filter: blur(9px);
+  backdrop-filter: blur(9px);
   background: rgba(20, 18, 18, 0.55);
   border: 1px solid var(--glass-tag-border);
   border-radius: var(--radius-pill);
@@ -611,8 +612,8 @@ button {
   width: 125px;
   height: 117px;
   border-radius: var(--radius-sm);
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   background: var(--glass-chat-bg);
   border: 1px solid var(--glass-panel-border);
   display: flex;
@@ -641,8 +642,8 @@ button {
 }
 
 .addon-tag {
-  backdrop-filter: blur(9px);
   -webkit-backdrop-filter: blur(9px);
+  backdrop-filter: blur(9px);
   background: var(--glass-tag-bg);
   border: 1px solid var(--glass-tag-border);
   border-radius: var(--radius-pill);
@@ -688,8 +689,8 @@ button {
   right: 24px;
   bottom: 24px;
   height: 60px;
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   background: var(--glass-header-bg);
   border: 1px solid var(--glass-header-border);
   border-radius: var(--radius-md);
@@ -789,8 +790,8 @@ button {
 }
 
 .refine-panel {
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   background: var(--glass-panel-bg);
   border: 1px solid var(--glass-panel-border);
   border-radius: var(--radius-lg);
@@ -871,8 +872,8 @@ button {
 
 /* ---------------- Summary ---------------- */
 .summary-panel {
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   background: var(--glass-panel-bg);
   border: 1px solid var(--glass-panel-border);
   border-radius: var(--radius-lg);

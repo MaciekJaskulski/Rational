@@ -1,0 +1,53 @@
+/* Tokens extracted 1:1 from Figma — Rational-demo, node 34:25 "Configurator — Desktop (Glass) with Zoe" */
+:root {
+  --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Brand reds */
+  --color-brand: #e30512;
+  --color-brand-hover: #c10510;
+  --color-brand-active: #8c2b2b; /* filled pill / selected state / primary button */
+  --color-brand-selected-bg: rgba(227, 5, 18, 0.22);
+  --color-brand-selected-border: rgba(255, 138, 138, 0.55);
+  --color-brand-chip-bg: rgba(227, 5, 18, 0.55);
+  --color-brand-glow: rgba(227, 5, 18, 0.4);
+
+  /* Glass surfaces */
+  --glass-header-bg: rgba(255, 255, 255, 0.1);
+  --glass-header-border: rgba(255, 255, 255, 0.18);
+  --glass-panel-bg: rgba(255, 255, 255, 0.1);
+  --glass-panel-border: rgba(255, 255, 255, 0.2);
+  --glass-chat-bg: rgba(255, 255, 255, 0.06);
+  --glass-chat-border: rgba(255, 255, 255, 0.2);
+  --glass-bubble-bg: rgba(255, 255, 255, 0.2);
+  --glass-bubble-border: rgba(255, 255, 255, 0.14);
+  --glass-tag-bg: rgba(255, 255, 255, 0.14);
+  --glass-tag-border: rgba(255, 255, 255, 0.22);
+  --glass-chip-bg: rgba(255, 255, 255, 0.08);
+  --glass-chip-border: rgba(255, 255, 255, 0.18);
+  --glass-option-bg: rgba(255, 255, 255, 0.06);
+  --glass-option-border: rgba(255, 255, 255, 0.14);
+  --glass-back-btn-bg: rgba(255, 255, 255, 0.1);
+  --glass-back-btn-border: rgba(255, 255, 255, 0.3);
+  --glass-suggestion-bg: rgba(255, 255, 255, 0.3);
+  --glass-input-bg: rgba(255, 255, 255, 0.3);
+
+  /* Text */
+  --color-text: #ffffff;
+  --color-text-muted-85: rgba(255, 255, 255, 0.85);
+  --color-text-muted-75: rgba(255, 255, 255, 0.75);
+  --color-text-muted-65: rgba(255, 255, 255, 0.65);
+  --color-text-muted-60: rgba(255, 255, 255, 0.6);
+  --color-text-muted-50: rgba(255, 255, 255, 0.5);
+
+  /* Radii */
+  --radius-pill: 100px;
+  --radius-lg: 20px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --radius-xs: 4px;
+
+  /* Shadows */
+  --shadow-panel: 0px 20px 60px 0px rgba(0, 0, 0, 0.35);
+  --shadow-chat: 0px 4px 24px 0px rgba(0, 0, 0, 0.16);
+  --shadow-continue: 0px 8px 24px 0px rgba(227, 5, 18, 0.4);
+}

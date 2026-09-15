@@ -175,8 +175,8 @@ function reducer(state, action) {
         text,
         suggestions: [
           { q: "What's actually different between Classic and Pro day-to-day?", a: "Classic uses dial controls and fixed programs you set yourself; Pro adds a touchscreen, sensor-adjusted cooking that adapts to load size, and automatic cleaning cycles." },
-          { q: "Can I change my mind on any of my earlier answers?", a: "Yes — tap back to any earlier step and your answer, and this screen, will update automatically." },
-          { q: "What happens if I don't change anything here?", a: "Then we carry your current build straight to Summary — nothing here is mandatory to touch." },
+          { q: "What's the typical delivery timeline?", a: "Most in-stock configurations ship within 2–4 weeks of order confirmation; your Rational advisor will confirm an exact date once the quote is finalized, factoring in any installation trades you need scheduled." },
+          { q: "What if I need to return or exchange it?", a: "Standard commercial units can be returned within 30 days if unused and in original packaging; a restocking fee may apply. Your advisor can walk through the specifics for your configuration before you order." },
         ],
       });
       return { ...state, chatByStep };

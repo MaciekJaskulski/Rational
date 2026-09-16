@@ -15,22 +15,6 @@
   min-height: 100svh;
   background: linear-gradient(160deg, #232323 0%, #141414 45%, #0b0b0b 100%);
 }
-.m-bg-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  z-index: 0;
-}
-.m-bg-scrim {
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 10, 10, 0.32);
-  z-index: 0;
-}
-
 .m-frame {
   position: relative;
   z-index: 1;

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { BG_CANVAS } from "../../assets/images";
 import MobileHeader from "./MobileHeader";
 import MobileProductZone from "./MobileProductZone";
 import MobileGuidedTab from "./MobileGuidedTab";
@@ -14,8 +13,6 @@ export default function MobileApp() {
 
   return (
     <div className="m-stage">
-      <img className="m-bg-canvas" src={BG_CANVAS} alt="" />
-      <div className="m-bg-scrim" />
       <div className="m-frame">
         <MobileHeader activeTab={activeTab} onTabChange={setActiveTab} />
         <MobileProductZone />

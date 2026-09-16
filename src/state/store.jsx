@@ -196,11 +196,14 @@ function reducer(state, action) {
       if (pathCStage === "confirm_business") {
         // Still deciding whether to confirm the inferred business type — a
         // detour question shouldn't re-litigate that decision, just answer
-        // it and gently check whether they're ready to move on.
-        list.push({ type: "assistant", text: answerText, citation });
+        // it and gently check whether they're ready to move on. Kept as ONE
+        // message (not two) so the answer is never scrolled out of view by
+        // a second bubble arriving right after it, and so only one
+        // StreamedText streams at a time.
         list.push({
           type: "assistant",
-          text: "Are you ready to move on to installation type?",
+          text: `${answerText} Are you ready to move on to installation type?`,
+          citation,
           suggestions: [
             { q: "Yes, let's continue", a: null, action: "pathc:confirm" },
             { q: "Not yet — I have more questions", a: "No rush — ask anything else, and just say the word when you're ready to move on to installation.", action: null },
@@ -368,13 +371,9 @@ function reducer(state, action) {
     case "PATHC_UPSIZE": {
       const answers = { ...state.answers, meals: "80_150" };
       const rec = computeRecommendation(answers);
-      let chatByStep = pushChat(state.chatByStep, "meals", {
+      const chatByStep = pushChat(state.chatByStep, "meals", {
         type: "assistant",
-        text: `Got it, bumping you to a ${rec.gridSize} ${rec.line} — that extra volume is exactly where Pro's sensor-adjusted cooking and automated cleaning earn their keep.`,
-      });
-      chatByStep = pushChat(chatByStep, "meals", {
-        type: "assistant",
-        text: "Two quick things I can't guess from a description: what's your power connection, electric or gas?",
+        text: `Got it, bumping you to a ${rec.gridSize} ${rec.line} — that extra volume is exactly where Pro's sensor-adjusted cooking and automated cleaning earn their keep. Two quick things I can't guess from a description: what's your power connection, electric or gas?`,
         suggestions: [
           { q: "Electric", a: null, action: "power:electric" },
           { q: "Gas", a: null, action: "power:gas" },
@@ -400,13 +399,9 @@ function reducer(state, action) {
       const power = action.power;
       const opt = findOption("power", power);
       const answers = { ...state.answers, power };
-      let chatByStep = pushChat(state.chatByStep, "meals", {
+      const chatByStep = pushChat(state.chatByStep, "meals", {
         type: "fact",
-        text: opt.factBubble,
-      });
-      chatByStep = pushChat(chatByStep, "meals", {
-        type: "assistant",
-        text: "And is there anything required for ventilation — do you already have extraction in place, or will you need a hood?",
+        text: `${opt.factBubble} And is there anything required for ventilation — do you already have extraction in place, or will you need a hood?`,
         suggestions: [
           { q: "I already have extraction", a: null, action: "vent:have_extraction" },
           { q: "I need a condensation hood", a: null, action: "vent:condensation" },
@@ -422,21 +417,18 @@ function reducer(state, action) {
       const focusId = state.answers.focus;
       const upsellText = UPSELL_INTRO[focusId] || "a couple of accessories tailored to your kitchen";
       let answers = state.answers;
-      let chatByStep = state.chatByStep;
+      let ventilationText;
       if (unsure) {
         answers = { ...answers, ventilation: "extraction" };
-        chatByStep = pushChat(chatByStep, "meals", {
-          type: "assistant",
-          text: "No problem — I'll assume you'll need a full extraction hood for now, based on typical smoke/grease output for this kind of kitchen. Your installer can confirm on-site and we'll adjust if needed.",
-        });
+        ventilationText =
+          "No problem — I'll assume you'll need a full extraction hood for now, based on typical smoke/grease output for this kind of kitchen. Your installer can confirm on-site and we'll adjust if needed.";
       } else {
         answers = { ...answers, ventilation };
-        const opt = findOption("ventilation", ventilation);
-        chatByStep = pushChat(chatByStep, "meals", { type: "fact", text: opt.factBubble });
+        ventilationText = findOption("ventilation", ventilation).factBubble;
       }
-      chatByStep = pushChat(chatByStep, "meals", {
+      const chatByStep = pushChat(state.chatByStep, "meals", {
         type: "assistant",
-        text: `Since you're running this kind of kitchen, a lot of operators pair this build with ${upsellText}. Want to add either?`,
+        text: `${ventilationText} Since you're running this kind of kitchen, a lot of operators pair this build with ${upsellText}. Want to add either?`,
         suggestions: (ACCESSORIES_BY_FOCUS[focusId] || []).map((a) => ({ q: `Add ${a.label}`, a: null, action: `accessory:${a.id}` })).concat([{ q: "No thanks", a: null, action: "accessory:none" }]),
       });
       return { ...state, answers, chatByStep, pathC: { ...state.pathC, stage: "upsell", ventilationAssumed: !!unsure } };

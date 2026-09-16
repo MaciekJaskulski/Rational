@@ -9,6 +9,7 @@
 export const SUPPORT_TOPICS = [
   {
     id: "installation",
+    prompt: "How does installation work?",
     keywords: ["install", "installation", "ventilation", "hookup", "hook up", "site prep", "electrical requirement", "extraction"],
     answer:
       "RATIONAL combi ovens are delivered and installed by certified RATIONAL Service Partners, including a free on-site Unit Introduction so your team is walked through the system before it's used commercially. If you don't have existing extraction, RATIONAL's UltraVent recirculating hoods use condensation technology to trap steam and vapors — no external ductwork required, and retrofitting is always possible.",
@@ -16,6 +17,7 @@ export const SUPPORT_TOPICS = [
   },
   {
     id: "warranty",
+    prompt: "What's the warranty on this?",
     keywords: ["warranty", "warrant", "guarantee"],
     answer:
       "New RATIONAL units and accessories carry a 2-year manufacturer warranty (12 months on used, demo, or training units sold from RATIONAL's own stock). Registering your device with ConnectedCooking right after installation speeds up any warranty claim.",
@@ -23,6 +25,7 @@ export const SUPPORT_TOPICS = [
   },
   {
     id: "service",
+    prompt: "Tell me more about service",
     keywords: ["service", "maintenance", "connectedcooking", "connected cooking", "care system", "cleaning cycle"],
     answer:
       "Ongoing service runs through RATIONAL's network of 1,200+ certified Service Partners, with 24/7 coverage and re-audited every 18 months. ServicePlus also bundles free software updates, the ConnectedCooking remote-monitoring platform, and ChefLine — RATIONAL chefs on the phone 365 days a year for cooking questions.",
@@ -30,6 +33,7 @@ export const SUPPORT_TOPICS = [
   },
   {
     id: "support",
+    prompt: "What about customer support?",
     keywords: ["support", "contact", "help desk", "customer service", "reach rational", "phone number", "chefline"],
     answer:
       "You can reach RATIONAL through ChefLine for cooking/application questions, a dedicated Technical Support form for equipment issues, or a general callback request — RATIONAL Service Partners also guarantee spare-parts supply and emergency coverage after hours and on weekends.",
@@ -42,8 +46,17 @@ export function matchSupportTopic(text) {
   return SUPPORT_TOPICS.find((t) => t.keywords.some((k) => lower.includes(k))) || null;
 }
 
+// Other support topics, phrased as natural follow-up questions — used so a
+// support answer is followed by logically related chips instead of whatever
+// unrelated step/pathC state happens to be pending.
+export function supportFollowUps(excludeId, limit = 3) {
+  return SUPPORT_TOPICS.filter((t) => t.id !== excludeId)
+    .slice(0, limit)
+    .map((t) => ({ q: t.prompt, a: t.answer, citation: t.citation, topicId: t.id }));
+}
+
 export function isCompareQuery(text) {
-  return /\bcompar/i.test(text);
+  return /\bcompar|\bdifference\b|\bdiffer\b/i.test(text);
 }
 
 // Real spec-sheet facts (electric versions), 1/1 GN "half size" line — same

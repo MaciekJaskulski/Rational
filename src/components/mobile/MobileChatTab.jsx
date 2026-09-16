@@ -162,13 +162,30 @@ export default function MobileChatTab() {
         </div>
       );
     }
+    const suggestionButtons = (suggestions) =>
+      suggestions.map((s, si) => (
+        <button
+          key={si}
+          type="button"
+          className="m-suggestion-chip"
+          onClick={() => {
+            if (s.action && resolveAction(dispatch, s.action)) return;
+            dispatch({ type: "TAP_SUGGESTION", stepKey: blockKey, msgIndex: entryIndex, suggestionIndex: si });
+          }}
+        >
+          {s.q}
+        </button>
+      ));
+
     if (entry.type === "qa") {
+      const showQaSuggestions = isLastEntryOfLastBlock && entry.suggestions && entry.suggestions.length > 0;
       return (
         <div className="m-msg-block" key={reactKey}>
           <div className="m-bubble-user">{entry.q}</div>
           <div className="m-bubble" style={{ marginTop: 6 }}>
             <StreamedText text={entry.a} after={<Citation citation={entry.citation} />} />
           </div>
+          {showQaSuggestions && <div className="m-suggestions">{suggestionButtons(entry.suggestions)}</div>}
         </div>
       );
     }
@@ -178,23 +195,7 @@ export default function MobileChatTab() {
         <div className="m-bubble">
           <StreamedText text={entry.text} after={<Citation citation={entry.citation} />} />
         </div>
-        {showSuggestions && (
-          <div className="m-suggestions">
-            {entry.suggestions.map((s, si) => (
-              <button
-                key={si}
-                type="button"
-                className="m-suggestion-chip"
-                onClick={() => {
-                  if (s.action && resolveAction(dispatch, s.action)) return;
-                  dispatch({ type: "TAP_SUGGESTION", stepKey: blockKey, msgIndex: entryIndex, suggestionIndex: si });
-                }}
-              >
-                {s.q}
-              </button>
-            ))}
-          </div>
-        )}
+        {showSuggestions && <div className="m-suggestions">{suggestionButtons(entry.suggestions)}</div>}
       </div>
     );
   }

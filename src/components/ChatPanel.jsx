@@ -80,6 +80,15 @@ export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask an
                 <div className="chat-bubble" style={{ marginTop: 6 }}>
                   <StreamedText text={msg.a} after={<Citation citation={msg.citation} />} />
                 </div>
+                {isLast && msg.suggestions && msg.suggestions.length > 0 && (
+                  <div className="chat-suggestions">
+                    {msg.suggestions.map((s, si) => (
+                      <button key={si} type="button" className="suggestion-chip" onClick={() => clickSuggestion(i, si, s)}>
+                        {s.q}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           }

@@ -3,7 +3,7 @@ import { STEPS } from "../data/steps";
 import { findOption, computeRecommendation } from "../data/engine";
 import { inferFromText, detectPower, detectVentilation } from "../data/nlu";
 import { ACCESSORIES_BY_FOCUS, UPSELL_INTRO } from "../data/accessories";
-import { matchSupportTopic, isCompareQuery, buildComparison, PRO_VS_CLASSIC, SUPPORT_TOPICS } from "../data/knowledge";
+import { matchSupportTopic, isCompareQuery, buildComparison, supportFollowUps, PRO_VS_CLASSIC, SUPPORT_TOPICS } from "../data/knowledge";
 
 const STEP4 = STEPS[3];
 
@@ -49,13 +49,6 @@ const CONTINUE_TO_REFINE_SUGGESTION = { q: "Continue to Refine & Accessories", a
 function getPendingSuggestions(state) {
   if (state.pathC.active) {
     const stage = state.pathC.stage;
-    if (stage === "confirm_business") {
-      return [
-        { q: "That's about right", a: null, action: "pathc:confirm" },
-        { q: "Actually, more like 80+ covers", a: null, action: "pathc:upsize" },
-        { q: "What made you assume that?", a: null, action: "pathc:why" },
-      ];
-    }
     if (stage === "power") {
       return STEP4.subQuestions[0].options.map((o) => ({ q: o.label, a: null, action: `power:${o.id}` }));
     }
@@ -159,7 +152,10 @@ function reducer(state, action) {
       const msg = list[msgIndex];
       if (!msg || !msg.suggestions) return state;
       const s = msg.suggestions[suggestionIndex];
-      list.push({ type: "qa", q: s.q, a: s.a, citation: s.citation || null });
+      // Support-topic suggestions chain into the OTHER topics, so browsing
+      // installation/warranty/service/support doesn't dead-end after one tap.
+      const followUps = s.topicId ? supportFollowUps(s.topicId) : null;
+      list.push({ type: "qa", q: s.q, a: s.a, citation: s.citation || null, suggestions: followUps });
       return { ...state, chatByStep: { ...state.chatByStep, [stepKey]: list } };
     }
 
@@ -169,6 +165,7 @@ function reducer(state, action) {
       let answerText =
         "Good question — a Rational advisor can go deeper on that once you send this through, but broadly: it depends on your exact setup. Try one of the suggested questions above for a sharper answer.";
       let citation = null;
+      let matchedTopicId = null;
 
       const supportTopic = matchSupportTopic(text);
       if (isCompareQuery(text)) {
@@ -176,6 +173,7 @@ function reducer(state, action) {
       } else if (supportTopic) {
         answerText = supportTopic.answer;
         citation = supportTopic.citation;
+        matchedTopicId = supportTopic.id;
       } else {
         const list0 = state.chatByStep[stepKey] || [];
         for (let i = list0.length - 1; i >= 0; i -= 1) {
@@ -191,11 +189,37 @@ function reducer(state, action) {
         }
       }
 
-      const pendingSuggestions = getPendingSuggestions(state);
-
       const list = [...(state.chatByStep[stepKey] || [])];
       list.push({ type: "user", text });
-      list.push({ type: "assistant", text: answerText, citation, suggestions: pendingSuggestions });
+
+      const pathCStage = state.pathC.active ? state.pathC.stage : null;
+      if (pathCStage === "confirm_business") {
+        // Still deciding whether to confirm the inferred business type — a
+        // detour question shouldn't re-litigate that decision, just answer
+        // it and gently check whether they're ready to move on.
+        list.push({ type: "assistant", text: answerText, citation });
+        list.push({
+          type: "assistant",
+          text: "Are you ready to move on to installation type?",
+          suggestions: [
+            { q: "Yes, let's continue", a: null, action: "pathc:confirm" },
+            { q: "Not yet — I have more questions", a: "No rush — ask anything else, and just say the word when you're ready to move on to installation.", action: null },
+          ],
+        });
+      } else if (pathCStage) {
+        // Path C is mid-flow (power/ventilation/upsell/done) — keep steering
+        // back to whatever question is actually still pending, rather than
+        // sidetracking into unrelated topics.
+        list.push({ type: "assistant", text: answerText, citation, suggestions: getPendingSuggestions(state) });
+      } else {
+        // Plain guided flow (no Path C), or the refine screen — offer
+        // logically related follow-ups: other support topics when the
+        // question matched one, otherwise whatever's still open (refine's
+        // own follow-ups) or a generic, still-grounded set of topics.
+        const suggestions = matchedTopicId ? supportFollowUps(matchedTopicId) : getPendingSuggestions(state) || supportFollowUps(null);
+        list.push({ type: "assistant", text: answerText, citation, suggestions });
+      }
+
       return { ...state, chatByStep: { ...state.chatByStep, [stepKey]: list } };
     }
 

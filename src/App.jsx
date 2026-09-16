@@ -1,10 +1,12 @@
 import { AppProvider, useAppState } from "./state/store";
+import { useIsMobile } from "./hooks/useIsMobile";
 import Header from "./components/Header";
 import QuestionPanel from "./components/QuestionPanel";
 import ProductPreview from "./components/ProductPreview";
 import BottomBar from "./components/BottomBar";
 import RefineScreen from "./components/RefineScreen";
 import SummaryScreen from "./components/SummaryScreen";
+import MobileApp from "./components/mobile/MobileApp";
 import { BG_CANVAS } from "./assets/images";
 
 function Screen() {
@@ -32,10 +34,15 @@ function Screen() {
   );
 }
 
+function Root() {
+  const isMobile = useIsMobile();
+  return isMobile ? <MobileApp /> : <Screen />;
+}
+
 export default function App() {
   return (
     <AppProvider>
-      <Screen />
+      <Root />
     </AppProvider>
   );
 }

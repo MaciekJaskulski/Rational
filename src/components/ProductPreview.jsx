@@ -3,9 +3,9 @@ import { useAppState, useRecommendation } from "../state/store";
 import { PRODUCT_IMAGES, PRODUCT_IMAGE_FALLBACK, ACCESSORY_IMAGES, slugify } from "../assets/images";
 
 // Only these get a tile — matches the asset set we actually have.
-const ADDON_ALLOWLIST = ["Mobile stand", "Fixed stand", "Standard GN rack", "Banquet rack", "Bakery rack"];
+export const ADDON_ALLOWLIST = ["Mobile stand", "Fixed stand", "Standard GN rack", "Banquet rack", "Bakery rack"];
 
-function getAddonTiles(rec) {
+export function getAddonTiles(rec) {
   return [rec.stand, rec.rack]
     .filter((label) => label && ADDON_ALLOWLIST.includes(label))
     .map((label) => ({ id: label, label, slug: slugify(label) }));

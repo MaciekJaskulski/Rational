@@ -1,57 +1,7 @@
-import { useState, useRef, useLayoutEffect, useEffect } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { useAppDispatch } from "../state/store";
-
-function resolveAction(dispatch, action) {
-  if (!action) return false;
-  const [kind, value] = action.split(":");
-  if (kind === "power") {
-    dispatch({ type: "PATHC_SET_POWER", power: value });
-    return true;
-  }
-  if (kind === "vent") {
-    if (value === "unsure") dispatch({ type: "PATHC_SET_VENTILATION", unsure: true });
-    else dispatch({ type: "PATHC_SET_VENTILATION", ventilation: value });
-    return true;
-  }
-  if (kind === "accessory") {
-    if (value === "none") dispatch({ type: "PATHC_ADD_ACCESSORY", accessoryId: null });
-    else dispatch({ type: "PATHC_ADD_ACCESSORY", accessoryId: value });
-    return true;
-  }
-  if (kind === "pathc") {
-    if (value === "confirm") dispatch({ type: "PATHC_CONFIRM" });
-    if (value === "upsize") dispatch({ type: "PATHC_UPSIZE" });
-    if (value === "why") dispatch({ type: "PATHC_WHY" });
-    return true;
-  }
-  return false;
-}
-
-// Streams text in once on mount (each chat bubble mounts exactly once, when appended to the log).
-function StreamedText({ text, speed = 14 }) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    setCount(0);
-    if (!text) return undefined;
-    let i = 0;
-    const id = setInterval(() => {
-      i += 1;
-      setCount(i);
-      if (i >= text.length) clearInterval(id);
-    }, speed);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text]);
-
-  const done = count >= (text?.length || 0);
-  return (
-    <>
-      {text.slice(0, count)}
-      {!done && <span className="stream-cursor" />}
-    </>
-  );
-}
+import StreamedText from "./chat/StreamedText";
+import resolveAction from "./chat/resolveAction";
 
 export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask anything", onAskAnything, freeTextMode }) {
   const dispatch = useAppDispatch();

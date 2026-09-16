@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAppState, useRecommendation } from "../state/store";
 import { PRODUCT_IMAGES, PRODUCT_IMAGE_FALLBACK, ACCESSORY_IMAGES, slugify } from "../assets/images";
+import ThreeDModal from "./ThreeDModal";
 
 // Only these get a tile — matches the asset set we actually have.
 export const ADDON_ALLOWLIST = ["Mobile stand", "Fixed stand", "Standard GN rack", "Banquet rack", "Bakery rack"];
@@ -14,6 +16,7 @@ export function getAddonTiles(rec) {
 export default function ProductPreview({ variant, force }) {
   const state = useAppState();
   const rec = useRecommendation();
+  const [show3d, setShow3d] = useState(false);
 
   if (!force && !state.productPreviewShown) return null;
 
@@ -36,6 +39,9 @@ export default function ProductPreview({ variant, force }) {
           <div className="product-picture">
             <img key={image} src={image} alt={name} className="product-img" />
           </div>
+          <button type="button" className="threed-btn" onClick={() => setShow3d(true)}>
+            3D view
+          </button>
           {!isSummary && (
             <div className="product-tag">
               <span className="tag-name">{name}</span>
@@ -60,6 +66,8 @@ export default function ProductPreview({ variant, force }) {
           </div>
         )}
       </div>
+
+      <ThreeDModal open={show3d} onClose={() => setShow3d(false)} />
     </motion.div>
   );
 }

@@ -598,3 +598,11 @@
 .m-sheet-scroll::-webkit-scrollbar {
   width: 0;
 }
+
+/* 3D view button sits ABOVE the product image on mobile (below it on desktop) */
+.m-threed-btn {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 11px;
+  padding: 6px 14px;
+}

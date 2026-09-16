@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { useAppState, useRecommendation } from "../../state/store";
 import { PRODUCT_IMAGES, PRODUCT_IMAGE_FALLBACK, ACCESSORY_IMAGES } from "../../assets/images";
 import { getAddonTiles } from "../ProductPreview";
+import ThreeDModal from "../ThreeDModal";
 
 export default function MobileProductZone() {
   const state = useAppState();
   const rec = useRecommendation();
+  const [show3d, setShow3d] = useState(false);
 
   if (!state.productPreviewShown) return null;
 
@@ -16,6 +19,9 @@ export default function MobileProductZone() {
   return (
     <div className="m-product-zone">
       <div className="m-product-main">
+        <button type="button" className="threed-btn m-threed-btn" onClick={() => setShow3d(true)}>
+          3D view
+        </button>
         <div className="m-product-picture">
           <img key={image} src={image} alt={name} className="m-product-img" />
         </div>
@@ -39,6 +45,7 @@ export default function MobileProductZone() {
           })}
         </div>
       )}
+      <ThreeDModal open={show3d} onClose={() => setShow3d(false)} />
     </div>
   );
 }

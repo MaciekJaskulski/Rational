@@ -63,24 +63,43 @@ const SIZE_ALIASES = [
   { re: /\b20\b|\btwenty\b/i, size: "20-Grid" },
 ];
 
-function extractSizes(text) {
-  const found = [];
-  for (const { re, size } of SIZE_ALIASES) {
-    if (re.test(text) && !found.includes(size)) found.push(size);
+const LINE_ALIASES = [
+  { re: /\bclassic\b/i, line: "iCombi Classic" },
+  { re: /\bpro\b/i, line: "iCombi Pro" },
+];
+
+// Splits on "and"/"vs"/"versus"/commas so each named size can pick up its OWN
+// line (Classic/Pro) from the same segment, rather than assuming every size
+// mentioned belongs to the user's current recommendation.
+function extractPairs(text, fallbackLine) {
+  const segments = text.split(/\band\b|\bvs\.?\b|\bversus\b|,/i);
+  const pairs = [];
+  for (const seg of segments) {
+    const sizeMatch = SIZE_ALIASES.find(({ re }) => re.test(seg));
+    if (!sizeMatch) continue;
+    const lineMatch = LINE_ALIASES.find(({ re }) => re.test(seg));
+    pairs.push({ line: lineMatch ? lineMatch.line : fallbackLine, size: sizeMatch.size });
   }
-  return found;
+  const unique = [];
+  for (const p of pairs) {
+    if (!unique.some((u) => u.line === p.line && u.size === p.size)) unique.push(p);
+  }
+  return unique;
 }
 
 // Builds a comparison response. Falls back to Pro vs Classic at the user's
 // current grid size when the message doesn't name two specific sizes.
 export function buildComparison(text, rec) {
-  const sizes = extractSizes(text);
-  if (sizes.length >= 2) {
-    const [a, b] = sizes;
-    const fa = GRID_FACTS[a];
-    const fb = GRID_FACTS[b];
-    return `${rec.line} ${a} vs ${rec.line} ${b}: the ${a} holds ${fa.pans} (${fa.dims}, ${fa.weight}, ${fa.power}), while the ${b} holds ${fb.pans} (${fb.dims}, ${fb.weight}, ${fb.power}). Same control logic across sizes, so staff don't need retraining if you size up later.`;
+  const pairs = extractPairs(text, rec.line);
+  if (pairs.length >= 2) {
+    const [a, b] = pairs;
+    if (a.size === b.size) {
+      return `${a.line} vs ${b.line} at ${a.size}: ${PRO_VS_CLASSIC} Dimensions, weight, and capacity are identical between the two at this size — it's the same cabinet.`;
+    }
+    const fa = GRID_FACTS[a.size];
+    const fb = GRID_FACTS[b.size];
+    return `${a.line} ${a.size} vs ${b.line} ${b.size}: the ${a.size} holds ${fa.pans} (${fa.dims}, ${fa.weight}, ${fa.power}), while the ${b.size} holds ${fb.pans} (${fb.dims}, ${fb.weight}, ${fb.power}). Same control logic across sizes, so staff don't need retraining if you size up later.`;
   }
-  const size = rec.gridSize || "10-Grid";
+  const size = pairs[0]?.size || rec.gridSize || "10-Grid";
   return `iCombi Classic vs iCombi Pro at ${size}: ${PRO_VS_CLASSIC} Dimensions, weight, and capacity are identical between the two at this size — it's the same cabinet. Right now you're tracking toward ${rec.line} (score ${rec.score}).`;
 }

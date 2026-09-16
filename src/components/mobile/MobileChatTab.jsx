@@ -59,6 +59,49 @@ function useConversationBlocks() {
   return blocks;
 }
 
+// Suggestion chips only appear once the message is 100% streamed in — `done`
+// is local to each entry component, which mounts once per chat entry (keyed
+// by position), matching StreamedText's own "streams once" model. Defined at
+// module scope (not inside MobileChatTab) so these don't remount — and lose
+// their `done` state — on every parent re-render.
+function MSuggestions({ done, show, suggestions, onClick }) {
+  if (!show || !done || !suggestions || suggestions.length === 0) return null;
+  return (
+    <div className="m-suggestions">
+      {suggestions.map((s, si) => (
+        <button key={si} type="button" className="m-suggestion-chip" onClick={() => onClick(si, s)}>
+          {s.q}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function MQaEntry({ q, a, citation, suggestions, show, onSuggestionClick }) {
+  const [done, setDone] = useState(false);
+  return (
+    <>
+      <div className="m-bubble-user">{q}</div>
+      <div className="m-bubble" style={{ marginTop: 6 }}>
+        <StreamedText text={a} after={<Citation citation={citation} />} onDone={() => setDone(true)} />
+      </div>
+      <MSuggestions done={done} show={show} suggestions={suggestions} onClick={onSuggestionClick} />
+    </>
+  );
+}
+
+function MAssistantEntry({ text, citation, suggestions, show, onSuggestionClick }) {
+  const [done, setDone] = useState(false);
+  return (
+    <>
+      <div className="m-bubble">
+        <StreamedText text={text} after={<Citation citation={citation} />} onDone={() => setDone(true)} />
+      </div>
+      <MSuggestions done={done} show={show} suggestions={suggestions} onClick={onSuggestionClick} />
+    </>
+  );
+}
+
 function useKeyboardInset() {
   const [inset, setInset] = useState(0);
   useEffect(() => {
@@ -96,6 +139,13 @@ export default function MobileChatTab() {
     }
   }, [state.screen, state.chatByStep.refine, dispatch]);
 
+  // Tracks total entries across ALL blocks (not just blocks.length) — a new
+  // message pushed mid-conversation (e.g. via Path C, which keeps writing to
+  // the same "meals" block the whole time) doesn't add a new block, so
+  // blocks.length alone misses it and the view never scrolls to reveal it.
+  const totalEntryCount = blocks.reduce((sum, b) => sum + b.entries.length, 0);
+  const hasSynthetic = blocks.some((b) => !!b.synthetic);
+
   useLayoutEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -103,7 +153,7 @@ export default function MobileChatTab() {
     const items = el.querySelectorAll(".m-msg-block");
     const last = items[items.length - 1];
     if (last) el.scrollTop = Math.max(0, last.offsetTop - 8);
-  }, [blocks.length, expandedField, state.sentToAdvisor]);
+  }, [totalEntryCount, hasSynthetic, expandedField, state.sentToAdvisor]);
 
   function handleSuggestion(action) {
     const [kind, a, b] = action.split(":");
@@ -162,40 +212,21 @@ export default function MobileChatTab() {
         </div>
       );
     }
-    const suggestionButtons = (suggestions) =>
-      suggestions.map((s, si) => (
-        <button
-          key={si}
-          type="button"
-          className="m-suggestion-chip"
-          onClick={() => {
-            if (s.action && resolveAction(dispatch, s.action)) return;
-            dispatch({ type: "TAP_SUGGESTION", stepKey: blockKey, msgIndex: entryIndex, suggestionIndex: si });
-          }}
-        >
-          {s.q}
-        </button>
-      ));
+    function onSuggestionClick(si, s) {
+      if (s.action && resolveAction(dispatch, s.action)) return;
+      dispatch({ type: "TAP_SUGGESTION", stepKey: blockKey, msgIndex: entryIndex, suggestionIndex: si });
+    }
 
     if (entry.type === "qa") {
-      const showQaSuggestions = isLastEntryOfLastBlock && entry.suggestions && entry.suggestions.length > 0;
       return (
         <div className="m-msg-block" key={reactKey}>
-          <div className="m-bubble-user">{entry.q}</div>
-          <div className="m-bubble" style={{ marginTop: 6 }}>
-            <StreamedText text={entry.a} after={<Citation citation={entry.citation} />} />
-          </div>
-          {showQaSuggestions && <div className="m-suggestions">{suggestionButtons(entry.suggestions)}</div>}
+          <MQaEntry q={entry.q} a={entry.a} citation={entry.citation} suggestions={entry.suggestions} show={isLastEntryOfLastBlock} onSuggestionClick={onSuggestionClick} />
         </div>
       );
     }
-    const showSuggestions = isLastEntryOfLastBlock && entry.suggestions && entry.suggestions.length > 0;
     return (
       <div className="m-msg-block" key={reactKey}>
-        <div className="m-bubble">
-          <StreamedText text={entry.text} after={<Citation citation={entry.citation} />} />
-        </div>
-        {showSuggestions && <div className="m-suggestions">{suggestionButtons(entry.suggestions)}</div>}
+        <MAssistantEntry text={entry.text} citation={entry.citation} suggestions={entry.suggestions} show={isLastEntryOfLastBlock} onSuggestionClick={onSuggestionClick} />
       </div>
     );
   }
@@ -215,16 +246,12 @@ export default function MobileChatTab() {
                 )}
                 {block.synthetic && isLastBlock && (
                   <div className="m-msg-block">
-                    <div className="m-bubble">
-                      <StreamedText text={block.synthetic.text} />
-                    </div>
-                    <div className="m-suggestions">
-                      {block.synthetic.suggestions.map((s, si) => (
-                        <button key={si} type="button" className="m-suggestion-chip" onClick={() => handleSuggestion(s.action)}>
-                          {s.q}
-                        </button>
-                      ))}
-                    </div>
+                    <MAssistantEntry
+                      text={block.synthetic.text}
+                      suggestions={block.synthetic.suggestions}
+                      show={true}
+                      onSuggestionClick={(si, s) => handleSuggestion(s.action)}
+                    />
                   </div>
                 )}
                 {block.isRefine && block.entries.length > 0 && (

@@ -4,6 +4,47 @@ import StreamedText from "./chat/StreamedText";
 import resolveAction from "./chat/resolveAction";
 import Citation from "./chat/Citation";
 
+// Suggestion chips only appear once the message is 100% streamed in — `done`
+// is local to this component instance, which mounts once per message (keyed
+// by position in chatLog), matching StreamedText's own "streams once" model.
+function Suggestions({ done, isLast, suggestions, onClick }) {
+  if (!isLast || !done || !suggestions || suggestions.length === 0) return null;
+  return (
+    <div className="chat-suggestions">
+      {suggestions.map((s, si) => (
+        <button key={si} type="button" className="suggestion-chip" onClick={() => onClick(si, s)}>
+          {s.q}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function QaEntry({ q, a, citation, suggestions, isLast, onSuggestionClick }) {
+  const [done, setDone] = useState(false);
+  return (
+    <>
+      <div className="chat-bubble-user">{q}</div>
+      <div className="chat-bubble" style={{ marginTop: 6 }}>
+        <StreamedText text={a} after={<Citation citation={citation} />} onDone={() => setDone(true)} />
+      </div>
+      <Suggestions done={done} isLast={isLast} suggestions={suggestions} onClick={onSuggestionClick} />
+    </>
+  );
+}
+
+function AssistantEntry({ text, citation, suggestions, isLast, onSuggestionClick }) {
+  const [done, setDone] = useState(false);
+  return (
+    <>
+      <div className="chat-bubble">
+        <StreamedText text={text} after={<Citation citation={citation} />} onDone={() => setDone(true)} />
+      </div>
+      <Suggestions done={done} isLast={isLast} suggestions={suggestions} onClick={onSuggestionClick} />
+    </>
+  );
+}
+
 export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask anything", onAskAnything, freeTextMode }) {
   const dispatch = useAppDispatch();
   const [text, setText] = useState("");
@@ -76,37 +117,14 @@ export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask an
           if (msg.type === "qa") {
             return (
               <div className="msg-block" key={i}>
-                <div className="chat-bubble-user">{msg.q}</div>
-                <div className="chat-bubble" style={{ marginTop: 6 }}>
-                  <StreamedText text={msg.a} after={<Citation citation={msg.citation} />} />
-                </div>
-                {isLast && msg.suggestions && msg.suggestions.length > 0 && (
-                  <div className="chat-suggestions">
-                    {msg.suggestions.map((s, si) => (
-                      <button key={si} type="button" className="suggestion-chip" onClick={() => clickSuggestion(i, si, s)}>
-                        {s.q}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <QaEntry q={msg.q} a={msg.a} citation={msg.citation} suggestions={msg.suggestions} isLast={isLast} onSuggestionClick={(si, s) => clickSuggestion(i, si, s)} />
               </div>
             );
           }
-          // fact or assistant, may carry suggestions — only the newest message still offers them
+          // fact or assistant, may carry suggestions — only the newest message still offers them, and only once fully streamed in
           return (
             <div className="msg-block" key={i}>
-              <div className="chat-bubble">
-                <StreamedText text={msg.text} after={<Citation citation={msg.citation} />} />
-              </div>
-              {isLast && msg.suggestions && msg.suggestions.length > 0 && (
-                <div className="chat-suggestions">
-                  {msg.suggestions.map((s, si) => (
-                    <button key={si} type="button" className="suggestion-chip" onClick={() => clickSuggestion(i, si, s)}>
-                      {s.q}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <AssistantEntry text={msg.text} citation={msg.citation} suggestions={msg.suggestions} isLast={isLast} onSuggestionClick={(si, s) => clickSuggestion(i, si, s)} />
             </div>
           );
         })}

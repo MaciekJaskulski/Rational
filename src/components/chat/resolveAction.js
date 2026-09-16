@@ -21,6 +21,7 @@ export default function resolveAction(dispatch, action) {
     if (value === "confirm") dispatch({ type: "PATHC_CONFIRM" });
     if (value === "upsize") dispatch({ type: "PATHC_UPSIZE" });
     if (value === "why") dispatch({ type: "PATHC_WHY" });
+    if (value === "finish") dispatch({ type: "PATHC_FINISH", target: "refine" });
     return true;
   }
   return false;

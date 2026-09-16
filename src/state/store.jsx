@@ -41,6 +41,42 @@ function pushChat(chatByStep, stepKey, entry) {
   return { ...chatByStep, [stepKey]: list };
 }
 
+const CONTINUE_TO_REFINE_SUGGESTION = { q: "Continue to Refine & Accessories", a: null, action: "pathc:finish" };
+
+// Whatever decision is still open right now — attached to any Zoe response so
+// the conversation never dead-ends, especially on mobile where chat is the
+// only way to keep moving through guided selling.
+function getPendingSuggestions(state) {
+  if (state.pathC.active) {
+    const stage = state.pathC.stage;
+    if (stage === "power") {
+      return STEP4.subQuestions[0].options.map((o) => ({ q: o.label, a: null, action: `power:${o.id}` }));
+    }
+    if (stage === "ventilation") {
+      return STEP4.subQuestions[1].options
+        .map((o) => ({ q: o.label, a: null, action: `vent:${o.id}` }))
+        .concat([{ q: "Not sure yet", a: null, action: "vent:unsure" }]);
+    }
+    if (stage === "upsell") {
+      const focusId = state.answers.focus;
+      return (ACCESSORIES_BY_FOCUS[focusId] || [])
+        .map((a) => ({ q: `Add ${a.label}`, a: null, action: `accessory:${a.id}` }))
+        .concat([{ q: "No thanks", a: null, action: "accessory:none" }]);
+    }
+    if (stage === "done" && state.screen === "guided") {
+      return [CONTINUE_TO_REFINE_SUGGESTION];
+    }
+  }
+  if (state.screen === "refine") {
+    return [
+      { q: "What's actually different between Classic and Pro day-to-day?", a: PRO_VS_CLASSIC },
+      { q: "What's the warranty on this?", a: SUPPORT_TOPICS.find((t) => t.id === "warranty").answer, citation: SUPPORT_TOPICS.find((t) => t.id === "warranty").citation },
+      { q: "How does installation work?", a: SUPPORT_TOPICS.find((t) => t.id === "installation").answer, citation: SUPPORT_TOPICS.find((t) => t.id === "installation").citation },
+    ];
+  }
+  return null;
+}
+
 function reducer(state, action) {
   switch (action.type) {
     case "RESTART":
@@ -84,6 +120,7 @@ function reducer(state, action) {
         type: "fact",
         optionId,
         text: option.factBubble,
+        citation: option.citation || null,
         suggestions: option.suggestions,
       });
 
@@ -147,9 +184,11 @@ function reducer(state, action) {
         }
       }
 
+      const pendingSuggestions = getPendingSuggestions(state);
+
       const list = [...(state.chatByStep[stepKey] || [])];
       list.push({ type: "user", text });
-      list.push({ type: "assistant", text: answerText, citation });
+      list.push({ type: "assistant", text: answerText, citation, suggestions: pendingSuggestions });
       return { ...state, chatByStep: { ...state.chatByStep, [stepKey]: list } };
     }
 
@@ -380,6 +419,7 @@ function reducer(state, action) {
         const chatByStep = pushChat(state.chatByStep, "meals", {
           type: "assistant",
           text: "No problem — you can always add accessories later from the Refine & Accessories screen.",
+          suggestions: [CONTINUE_TO_REFINE_SUGGESTION],
         });
         return { ...state, chatByStep, pathC: { ...state.pathC, stage: "done" } };
       }
@@ -387,6 +427,7 @@ function reducer(state, action) {
       const chatByStep = pushChat(state.chatByStep, "meals", {
         type: "assistant",
         text: `Added — ${acc.detail}`,
+        suggestions: [CONTINUE_TO_REFINE_SUGGESTION],
       });
       return { ...state, accessories, chatByStep, pathC: { ...state.pathC, stage: "done" } };
     }

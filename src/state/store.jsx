@@ -3,6 +3,7 @@ import { STEPS } from "../data/steps";
 import { findOption, computeRecommendation } from "../data/engine";
 import { inferFromText, detectPower, detectVentilation } from "../data/nlu";
 import { ACCESSORIES_BY_FOCUS, UPSELL_INTRO } from "../data/accessories";
+import { matchSupportTopic, isCompareQuery, buildComparison, PRO_VS_CLASSIC, SUPPORT_TOPICS } from "../data/knowledge";
 
 const STEP4 = STEPS[3];
 
@@ -114,27 +115,41 @@ function reducer(state, action) {
       const msg = list[msgIndex];
       if (!msg || !msg.suggestions) return state;
       const s = msg.suggestions[suggestionIndex];
-      list.push({ type: "qa", q: s.q, a: s.a });
+      list.push({ type: "qa", q: s.q, a: s.a, citation: s.citation || null });
       return { ...state, chatByStep: { ...state.chatByStep, [stepKey]: list } };
     }
 
     case "ASK_ANYTHING": {
       const { stepKey, text } = action;
+      const rec = computeRecommendation(state.answers, state.overrides);
       let answerText =
         "Good question — a Rational advisor can go deeper on that once you send this through, but broadly: it depends on your exact setup. Try one of the suggested questions above for a sharper answer.";
-      const list = [...(state.chatByStep[stepKey] || [])];
-      for (let i = list.length - 1; i >= 0; i -= 1) {
-        const msg = list[i];
-        if (msg.suggestions) {
-          const match = msg.suggestions.find((s) => s.q.toLowerCase().includes(text.toLowerCase().slice(0, 8)) || text.toLowerCase().includes(s.q.toLowerCase().split(" ")[0]));
-          if (match) {
-            answerText = match.a;
-            break;
+      let citation = null;
+
+      const supportTopic = matchSupportTopic(text);
+      if (isCompareQuery(text)) {
+        answerText = buildComparison(text, rec);
+      } else if (supportTopic) {
+        answerText = supportTopic.answer;
+        citation = supportTopic.citation;
+      } else {
+        const list0 = state.chatByStep[stepKey] || [];
+        for (let i = list0.length - 1; i >= 0; i -= 1) {
+          const msg = list0[i];
+          if (msg.suggestions) {
+            const match = msg.suggestions.find((s) => s.q.toLowerCase().includes(text.toLowerCase().slice(0, 8)) || text.toLowerCase().includes(s.q.toLowerCase().split(" ")[0]));
+            if (match) {
+              answerText = match.a;
+              citation = match.citation || null;
+              break;
+            }
           }
         }
       }
+
+      const list = [...(state.chatByStep[stepKey] || [])];
       list.push({ type: "user", text });
-      list.push({ type: "assistant", text: answerText });
+      list.push({ type: "assistant", text: answerText, citation });
       return { ...state, chatByStep: { ...state.chatByStep, [stepKey]: list } };
     }
 
@@ -170,9 +185,9 @@ function reducer(state, action) {
         type: "fact",
         text,
         suggestions: [
-          { q: "What's actually different between Classic and Pro day-to-day?", a: "Classic uses dial controls and fixed programs you set yourself; Pro adds a touchscreen, sensor-adjusted cooking that adapts to load size, and automatic cleaning cycles." },
-          { q: "What's the typical delivery timeline?", a: "Most in-stock configurations ship within 2–4 weeks of order confirmation; your Rational advisor will confirm an exact date once the quote is finalized, factoring in any installation trades you need scheduled." },
-          { q: "What if I need to return or exchange it?", a: "Standard commercial units can be returned within 30 days if unused and in original packaging; a restocking fee may apply. Your advisor can walk through the specifics for your configuration before you order." },
+          { q: "What's actually different between Classic and Pro day-to-day?", a: PRO_VS_CLASSIC },
+          { q: "What's the warranty on this?", a: SUPPORT_TOPICS.find((t) => t.id === "warranty").answer, citation: SUPPORT_TOPICS.find((t) => t.id === "warranty").citation },
+          { q: "How does installation work?", a: SUPPORT_TOPICS.find((t) => t.id === "installation").answer, citation: SUPPORT_TOPICS.find((t) => t.id === "installation").citation },
         ],
       });
       return { ...state, chatByStep };

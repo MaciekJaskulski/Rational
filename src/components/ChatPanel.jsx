@@ -2,6 +2,7 @@ import { useState, useRef, useLayoutEffect } from "react";
 import { useAppDispatch } from "../state/store";
 import StreamedText from "./chat/StreamedText";
 import resolveAction from "./chat/resolveAction";
+import Citation from "./chat/Citation";
 
 export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask anything", onAskAnything, freeTextMode }) {
   const dispatch = useAppDispatch();
@@ -77,7 +78,7 @@ export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask an
               <div className="msg-block" key={i}>
                 <div className="chat-bubble-user">{msg.q}</div>
                 <div className="chat-bubble" style={{ marginTop: 6 }}>
-                  <StreamedText text={msg.a} />
+                  <StreamedText text={msg.a} after={<Citation citation={msg.citation} />} />
                 </div>
               </div>
             );
@@ -86,7 +87,7 @@ export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask an
           return (
             <div className="msg-block" key={i}>
               <div className="chat-bubble">
-                <StreamedText text={msg.text} />
+                <StreamedText text={msg.text} after={<Citation citation={msg.citation} />} />
               </div>
               {isLast && msg.suggestions && msg.suggestions.length > 0 && (
                 <div className="chat-suggestions">

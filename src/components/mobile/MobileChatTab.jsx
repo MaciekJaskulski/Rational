@@ -4,6 +4,7 @@ import { useAppState, useAppDispatch, useRecommendation } from "../../state/stor
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../../data/engine";
 import StreamedText from "../chat/StreamedText";
 import resolveAction from "../chat/resolveAction";
+import Citation from "../chat/Citation";
 
 const REFINE_FIELD_META = {
   gridSize: { label: "grid size", options: gridSizeOptions },
@@ -162,7 +163,7 @@ export default function MobileChatTab() {
         <div className="m-msg-block" key={reactKey}>
           <div className="m-bubble-user">{entry.q}</div>
           <div className="m-bubble" style={{ marginTop: 6 }}>
-            <StreamedText text={entry.a} />
+            <StreamedText text={entry.a} after={<Citation citation={entry.citation} />} />
           </div>
         </div>
       );
@@ -171,7 +172,7 @@ export default function MobileChatTab() {
     return (
       <div className="m-msg-block" key={reactKey}>
         <div className="m-bubble">
-          <StreamedText text={entry.text} />
+          <StreamedText text={entry.text} after={<Citation citation={entry.citation} />} />
         </div>
         {showSuggestions && (
           <div className="m-suggestions">

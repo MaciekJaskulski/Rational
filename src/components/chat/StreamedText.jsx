@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 
 // Streams text in once on mount (each chat bubble mounts exactly once, when appended to the log).
-export default function StreamedText({ text, speed = 14 }) {
+// `after` renders once streaming completes — used for citation links, so they
+// don't pop in before the text has finished "being said".
+export default function StreamedText({ text, speed = 14, after = null }) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -22,6 +24,7 @@ export default function StreamedText({ text, speed = 14 }) {
     <>
       {text.slice(0, count)}
       {!done && <span className="stream-cursor" />}
+      {done && after}
     </>
   );
 }

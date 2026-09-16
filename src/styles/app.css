@@ -413,6 +413,19 @@ button {
   line-height: 1.5;
   color: #fff;
 }
+.chat-citation {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-brand-hover, #c10510);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.chat-citation:hover {
+  color: #ff8a8a;
+}
+
 .chat-bubble.transition {
   font-style: italic;
   color: var(--color-text-muted-85);

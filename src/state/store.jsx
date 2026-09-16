@@ -77,11 +77,7 @@ function reducer(state, action) {
       const step = STEPS.find((s) => s.id === stepId);
       const option = step.options.find((o) => o.id === optionId);
       const answers = { ...state.answers, [stepKey]: optionId };
-
-      let productPreviewShown = state.productPreviewShown;
-      if (stepKey === "meals" && optionId !== step.options[0].id) {
-        productPreviewShown = true;
-      }
+      const productPreviewShown = state.productPreviewShown || stepKey === "meals";
 
       let chatByStep = pushChat(state.chatByStep, stepKey, {
         type: "fact",

@@ -49,6 +49,13 @@ const CONTINUE_TO_REFINE_SUGGESTION = { q: "Continue to Refine & Accessories", a
 function getPendingSuggestions(state) {
   if (state.pathC.active) {
     const stage = state.pathC.stage;
+    if (stage === "confirm_business") {
+      return [
+        { q: "That's about right", a: null, action: "pathc:confirm" },
+        { q: "Actually, more like 80+ covers", a: null, action: "pathc:upsize" },
+        { q: "What made you assume that?", a: null, action: "pathc:why" },
+      ];
+    }
     if (stage === "power") {
       return STEP4.subQuestions[0].options.map((o) => ({ q: o.label, a: null, action: `power:${o.id}` }));
     }

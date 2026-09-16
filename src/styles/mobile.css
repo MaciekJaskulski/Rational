@@ -2,32 +2,39 @@
    All classes are "m-" prefixed and only ever rendered by src/components/mobile/*,
    so this file can't collide with or affect the desktop layout. */
 
+/* Height uses svh (smallest viewport — guaranteed visible even with browser
+   chrome showing) as a MIN, not a fixed height, and nothing here clips
+   overflow — on mobile browsers dvh/vh math is unreliable (address bar
+   show/hide, OS nav bar), and a fixed height + overflow:hidden combo was
+   silently clipping the bottom bar / chat input off-screen on some devices.
+   If content is ever taller than one screen the page just scrolls instead
+   of losing controls. */
 .m-stage {
   position: relative;
   width: 100%;
-  height: 100dvh;
-  min-height: 100vh;
-  overflow: hidden;
+  min-height: 100svh;
   background: linear-gradient(160deg, #232323 0%, #141414 45%, #0b0b0b 100%);
 }
 .m-bg-canvas {
-  position: absolute;
+  position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
+  z-index: 0;
 }
 .m-bg-scrim {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(10, 10, 10, 0.32);
+  z-index: 0;
 }
 
 .m-frame {
   position: relative;
   z-index: 1;
-  height: 100%;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
 }
@@ -412,11 +419,14 @@
 
 /* ---------------- Bottom bar (guided tab) ---------------- */
 .m-bottom-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
   flex-shrink: 0;
   height: 78px;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(30, 28, 28, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-top: none;
   display: flex;
@@ -459,6 +469,7 @@
   border-radius: 24px;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.06);
   overflow: hidden;
   padding-top: 12px;
   padding-bottom: max(0px, env(safe-area-inset-bottom));
@@ -526,13 +537,18 @@
 }
 
 .m-chat-input-row {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
   flex-shrink: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 12px 8px 8px;
+  padding: 12px 8px max(8px, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: inherit;
+  background: rgba(40, 36, 36, 0.88);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   transition: transform 0.15s ease;
 }
 .m-chat-input {

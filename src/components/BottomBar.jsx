@@ -50,6 +50,11 @@ export default function BottomBar() {
 
   if (state.screen === "summary") return null;
 
+  // Refine has its own Continue/Back inside the panel now (more visible,
+  // right next to the fields being edited) — the sticky bar here just keeps
+  // showing the build-so-far chips, no duplicate actions.
+  const showActions = state.screen !== "refine";
+
   return (
     <div className="bottom-bar glass">
       <div className="chips">
@@ -59,16 +64,18 @@ export default function BottomBar() {
           </span>
         ))}
       </div>
-      <div className="bottom-actions">
-        {!isFirstStep && (
-          <button className="btn btn-back" onClick={handleBack}>
-            Back
+      {showActions && (
+        <div className="bottom-actions">
+          {!isFirstStep && (
+            <button className="btn btn-back" onClick={handleBack}>
+              Back
+            </button>
+          )}
+          <button className="btn btn-primary" onClick={handleContinue} disabled={!continueEnabled}>
+            Continue →
           </button>
-        )}
-        <button className="btn btn-primary" onClick={handleContinue} disabled={!continueEnabled}>
-          Continue →
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

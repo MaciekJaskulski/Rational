@@ -3,6 +3,8 @@ import { useAppState, useAppDispatch, useRecommendation } from "../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../data/engine";
 import ChatPanel from "./ChatPanel";
 
+const DEALER_LOCATOR_URL = "https://www.rational-online.com/en_gb/customercare/rational-dealer/?zipKey=London%2C+UK";
+
 export default function RefineScreen() {
   const state = useAppState();
   const dispatch = useAppDispatch();
@@ -79,6 +81,18 @@ export default function RefineScreen() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 8 }}>
+            <button className="btn btn-back" type="button">
+              Save as PDF
+            </button>
+            <button className="btn btn-back" type="button">
+              Email it
+            </button>
+            <a className="btn btn-primary" href={DEALER_LOCATOR_URL} target="_blank" rel="noreferrer">
+              Find your local dealer
+            </a>
           </div>
         </div>
 

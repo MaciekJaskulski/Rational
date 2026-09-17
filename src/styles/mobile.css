@@ -471,6 +471,12 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  /* The browser's default scroll-anchoring tries to keep the viewport
+     "stable" as content grows below it — which fights the manual scrollTop
+     pin-to-top in MobileChatTab (that pin fires once per new message, not
+     per character, specifically so a streaming message stays readable from
+     its first line instead of the view sliding to chase the growing text). */
+  overflow-anchor: none;
   border-radius: 24px 24px 0 0;
   padding: 8px 16px;
   display: flex;

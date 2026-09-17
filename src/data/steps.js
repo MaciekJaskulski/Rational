@@ -180,6 +180,9 @@ export const STEPS = [
             q: "What are the dimensions of this stand?",
             a: "The castor version measures about 34¾\"W × 30″D × 27½\"H (883 × 760 × 699 mm) and weighs around 76 lb (34.4 kg) on its own — rated for up to 600 kg on the equivalent fixed frame, so it's built for the oven's full weight.",
             citation: { label: "RATIONAL Stand II, Angila Catering Equipment", url: "https://angliacateringequipment.com/product/rational-stand-ii-for-icombi-pro-icombi-classic-6-1-1-10-1-1/" },
+            // Not shown as a chip — reachable only by typing it, per explicit request. Still
+            // findable by the free-text fuzzy matcher since it stays in this array.
+            hidden: true,
           },
         ],
       },

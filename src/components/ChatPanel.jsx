@@ -9,13 +9,19 @@ import Citation from "./chat/Citation";
 // by position in chatLog), matching StreamedText's own "streams once" model.
 function Suggestions({ done, isLast, suggestions, onClick }) {
   if (!isLast || !done || !suggestions || suggestions.length === 0) return null;
+  // `hidden` suggestions stay in the array (so the free-text fuzzy matcher can
+  // still find them) but never render as a chip — `si` must stay the index
+  // into the REAL array for that matching (and TAP_SUGGESTION) to work.
+  if (suggestions.every((s) => s.hidden)) return null;
   return (
     <div className="chat-suggestions">
-      {suggestions.map((s, si) => (
-        <button key={si} type="button" className="suggestion-chip" onClick={() => onClick(si, s)}>
-          {s.q}
-        </button>
-      ))}
+      {suggestions.map((s, si) =>
+        s.hidden ? null : (
+          <button key={si} type="button" className="suggestion-chip" onClick={() => onClick(si, s)}>
+            {s.q}
+          </button>
+        )
+      )}
     </div>
   );
 }

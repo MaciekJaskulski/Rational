@@ -71,7 +71,7 @@ function buildQueue(blocks, sentToAdvisor, pathCActive) {
       queue.push({ id: `${block.key}-${i}`, kind: "entry", entry, blockKey: block.key, entryIndex: i });
     });
     if (block.synthetic && isLastBlock) {
-      queue.push({ id: `${block.key}-synthetic`, kind: "synthetic", synthetic: block.synthetic });
+      queue.push({ id: `${block.key}-synthetic`, kind: "synthetic", synthetic: block.synthetic, blockKey: block.key });
     }
     if (block.isRefine && block.entries.length > 0) {
       // The mobile Path C demo ends with its own three CTAs instead of the
@@ -100,13 +100,19 @@ function isInstantKind(item) {
 // queue so the next queued message can start.
 function MSuggestions({ done, show, suggestions, onClick }) {
   if (!show || !done || !suggestions || suggestions.length === 0) return null;
+  // `hidden` suggestions stay in the array (so the free-text fuzzy matcher
+  // can still find them) but never render as a chip — `si` must stay the
+  // index into the REAL array for that matching (and TAP_SUGGESTION) to work.
+  if (suggestions.every((s) => s.hidden)) return null;
   return (
     <div className="m-suggestions">
-      {suggestions.map((s, si) => (
-        <button key={si} type="button" className="m-suggestion-chip" onClick={() => onClick(si, s)}>
-          {s.q}
-        </button>
-      ))}
+      {suggestions.map((s, si) =>
+        s.hidden ? null : (
+          <button key={si} type="button" className="m-suggestion-chip" onClick={() => onClick(si, s)}>
+            {s.q}
+          </button>
+        )
+      )}
     </div>
   );
 }
@@ -289,7 +295,14 @@ export default function MobileChatTab() {
         );
       }
       function onSuggestionClick(si, s) {
-        if (s.action && resolveAction(dispatch, s.action)) return;
+        if (s.action) {
+          // Action-driven chips (Yes/continue, option taps routed through an
+          // action string) don't get a "qa" pairing the way plain Q&A chips
+          // do — echo the click as its own user bubble so every tap shows up
+          // in the conversation, matching plain-suggestion taps below.
+          dispatch({ type: "ECHO_USER", stepKey: item.blockKey, text: s.q });
+          if (resolveAction(dispatch, s.action)) return;
+        }
         dispatch({ type: "TAP_SUGGESTION", stepKey: item.blockKey, msgIndex: item.entryIndex, suggestionIndex: si });
       }
       if (entry.type === "qa") {
@@ -328,7 +341,10 @@ export default function MobileChatTab() {
             text={item.synthetic.text}
             suggestions={item.synthetic.suggestions}
             show={true}
-            onSuggestionClick={(si, s) => handleSuggestion(s.action)}
+            onSuggestionClick={(si, s) => {
+              if (s.action) dispatch({ type: "ECHO_USER", stepKey: item.blockKey, text: s.q });
+              handleSuggestion(s.action);
+            }}
             onStreamDone={() => advanceIfCurrent(index)}
           />
         </div>

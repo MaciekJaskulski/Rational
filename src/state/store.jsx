@@ -180,6 +180,7 @@ function reducer(state, action) {
         type: "fact",
         optionId: `${subKey}:${optionId}`,
         text: option.factBubble,
+        citation: option.citation || null,
         suggestions: option.suggestions,
       });
       return { ...state, answers, chatByStep };

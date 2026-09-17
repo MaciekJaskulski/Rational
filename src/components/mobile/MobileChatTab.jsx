@@ -52,11 +52,42 @@ function useConversationBlocks() {
   return blocks;
 }
 
+// Flattens the per-step blocks into ONE chronological queue — real entries,
+// then (only on the last block) a synthetic question, then (once refine is
+// reached) the refine prompt/confirmation. This is what actually gets played
+// out message-by-message; see revealCount below.
+function buildQueue(blocks, sentToAdvisor) {
+  const queue = [];
+  const lastBlockIdx = blocks.length - 1;
+  blocks.forEach((block, bi) => {
+    const isLastBlock = bi === lastBlockIdx;
+    block.entries.forEach((entry, i) => {
+      queue.push({ id: `${block.key}-${i}`, kind: "entry", entry, blockKey: block.key, entryIndex: i });
+    });
+    if (block.synthetic && isLastBlock) {
+      queue.push({ id: `${block.key}-synthetic`, kind: "synthetic", synthetic: block.synthetic });
+    }
+    if (block.isRefine && block.entries.length > 0) {
+      queue.push({ id: "refine-prompt", kind: sentToAdvisor ? "refine-sent" : "refine-prompt" });
+    }
+  });
+  return queue;
+}
+
+// Items with nothing to stream (the user's own bubble, the refine control
+// panel) don't hold up the queue — they're revealed and immediately let the
+// next item start.
+function isInstantKind(item) {
+  return (item.kind === "entry" && item.entry.type === "user") || item.kind === "refine-prompt";
+}
+
 // Suggestion chips only appear once the message is 100% streamed in — `done`
 // is local to each entry component, which mounts once per chat entry (keyed
 // by position), matching StreamedText's own "streams once" model. Defined at
 // module scope (not inside MobileChatTab) so these don't remount — and lose
-// their `done` state — on every parent re-render.
+// their `done` state — on every parent re-render. `onStreamDone` (separate
+// from the local `done` used for suggestion-gating) advances the reveal
+// queue so the next queued message can start.
 function MSuggestions({ done, show, suggestions, onClick }) {
   if (!show || !done || !suggestions || suggestions.length === 0) return null;
   return (
@@ -70,25 +101,33 @@ function MSuggestions({ done, show, suggestions, onClick }) {
   );
 }
 
-function MQaEntry({ q, a, citation, suggestions, show, onSuggestionClick }) {
+function MQaEntry({ q, a, citation, suggestions, show, onSuggestionClick, onStreamDone }) {
   const [done, setDone] = useState(false);
+  function handleDone() {
+    setDone(true);
+    if (onStreamDone) onStreamDone();
+  }
   return (
     <>
       <div className="m-bubble-user">{q}</div>
       <div className="m-bubble" style={{ marginTop: 6 }}>
-        <StreamedText text={a} after={<Citation citation={citation} />} onDone={() => setDone(true)} />
+        <StreamedText text={a} after={<Citation citation={citation} />} onDone={handleDone} />
       </div>
       <MSuggestions done={done} show={show} suggestions={suggestions} onClick={onSuggestionClick} />
     </>
   );
 }
 
-function MAssistantEntry({ text, citation, suggestions, show, onSuggestionClick }) {
+function MAssistantEntry({ text, citation, suggestions, show, onSuggestionClick, onStreamDone }) {
   const [done, setDone] = useState(false);
+  function handleDone() {
+    setDone(true);
+    if (onStreamDone) onStreamDone();
+  }
   return (
     <>
       <div className="m-bubble">
-        <StreamedText text={text} after={<Citation citation={citation} />} onDone={() => setDone(true)} />
+        <StreamedText text={text} after={<Citation citation={citation} />} onDone={handleDone} />
       </div>
       <MSuggestions done={done} show={show} suggestions={suggestions} onClick={onSuggestionClick} />
     </>
@@ -120,10 +159,13 @@ export default function MobileChatTab() {
   const dispatch = useAppDispatch();
   const rec = useRecommendation();
   const blocks = useConversationBlocks();
+  const queue = buildQueue(blocks, state.sentToAdvisor);
   const [text, setText] = useState("");
   const [expandedField, setExpandedField] = useState(null);
+  const [revealCount, setRevealCount] = useState(0);
   const scrollRef = useRef(null);
   const spacerRef = useRef(null);
+  const prevQueueLenRef = useRef(0);
   const keyboardInset = useKeyboardInset();
 
   useEffect(() => {
@@ -132,13 +174,36 @@ export default function MobileChatTab() {
     }
   }, [state.screen, state.chatByStep.refine, dispatch]);
 
-  // Tracks total entries across ALL blocks (not just blocks.length) — a new
-  // message pushed mid-conversation (e.g. via Path C, which keeps writing to
-  // the same "meals" block the whole time) doesn't add a new block, so
-  // blocks.length alone misses it and the view never scrolls to reveal it.
-  const totalEntryCount = blocks.reduce((sum, b) => sum + b.entries.length, 0);
-  const hasSynthetic = blocks.some((b) => !!b.synthetic);
+  // Messages are played out one at a time: only the first `revealCount`
+  // queue items are mounted at all. A streamed item advances the queue via
+  // its own onDone; an instant item (see isInstantKind) advances itself as
+  // soon as it's shown. If the queue ever shrinks (RESTART), start over.
+  useEffect(() => {
+    if (queue.length < prevQueueLenRef.current) {
+      setRevealCount(0);
+    }
+    prevQueueLenRef.current = queue.length;
+  }, [queue.length]);
 
+  useEffect(() => {
+    if (revealCount === 0) {
+      if (queue.length > 0) setRevealCount(1);
+      return;
+    }
+    const current = queue[revealCount - 1];
+    if (current && isInstantKind(current) && revealCount < queue.length) {
+      setRevealCount((rc) => rc + 1);
+    }
+  }, [revealCount, queue.length]);
+
+  function advanceIfCurrent(index) {
+    setRevealCount((rc) => (index === rc - 1 ? rc + 1 : rc));
+  }
+
+  // Pins the newest ACTIVE message to the top of the visible area — fires
+  // only when a new message actually starts (revealCount changes), not on
+  // every character the current one streams, so a long message stays put
+  // (readable from its start) instead of chasing the scroll downward.
   useLayoutEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -146,7 +211,7 @@ export default function MobileChatTab() {
     const items = el.querySelectorAll(".m-msg-block");
     const last = items[items.length - 1];
     if (last) el.scrollTop = Math.max(0, last.offsetTop - 8);
-  }, [totalEntryCount, hasSynthetic, expandedField, state.sentToAdvisor]);
+  }, [revealCount, expandedField, state.sentToAdvisor]);
 
   function handleSuggestion(action) {
     const [kind, a, b] = action.split(":");
@@ -188,102 +253,121 @@ export default function MobileChatTab() {
     dispatch({ type: "ASK_ANYTHING", stepKey, text: trimmed });
   }
 
-  function renderEntry(entry, entryIndex, blockKey, reactKey, isLastEntryOfLastBlock) {
-    if (entry.type === "transition") {
-      return (
-        <div className="m-msg-block" key={reactKey}>
-          <div className="m-bubble m-bubble-transition">
-            <StreamedText text={entry.text} />
+  function renderQueueItem(item, index, isLast) {
+    const key = item.id;
+
+    if (item.kind === "entry") {
+      const entry = item.entry;
+      if (entry.type === "transition") {
+        return (
+          <div className="m-msg-block" key={key}>
+            <div className="m-bubble m-bubble-transition">
+              <StreamedText text={entry.text} onDone={() => advanceIfCurrent(index)} />
+            </div>
           </div>
-        </div>
-      );
-    }
-    if (entry.type === "user") {
+        );
+      }
+      if (entry.type === "user") {
+        return (
+          <div className="m-msg-block" key={key}>
+            <div className="m-bubble-user">{entry.text}</div>
+          </div>
+        );
+      }
+      function onSuggestionClick(si, s) {
+        if (s.action && resolveAction(dispatch, s.action)) return;
+        dispatch({ type: "TAP_SUGGESTION", stepKey: item.blockKey, msgIndex: item.entryIndex, suggestionIndex: si });
+      }
+      if (entry.type === "qa") {
+        return (
+          <div className="m-msg-block" key={key}>
+            <MQaEntry
+              q={entry.q}
+              a={entry.a}
+              citation={entry.citation}
+              suggestions={entry.suggestions}
+              show={isLast}
+              onSuggestionClick={onSuggestionClick}
+              onStreamDone={() => advanceIfCurrent(index)}
+            />
+          </div>
+        );
+      }
       return (
-        <div className="m-msg-block" key={reactKey}>
-          <div className="m-bubble-user">{entry.text}</div>
+        <div className="m-msg-block" key={key}>
+          <MAssistantEntry
+            text={entry.text}
+            citation={entry.citation}
+            suggestions={entry.suggestions}
+            show={isLast}
+            onSuggestionClick={onSuggestionClick}
+            onStreamDone={() => advanceIfCurrent(index)}
+          />
         </div>
       );
-    }
-    function onSuggestionClick(si, s) {
-      if (s.action && resolveAction(dispatch, s.action)) return;
-      dispatch({ type: "TAP_SUGGESTION", stepKey: blockKey, msgIndex: entryIndex, suggestionIndex: si });
     }
 
-    if (entry.type === "qa") {
+    if (item.kind === "synthetic") {
       return (
-        <div className="m-msg-block" key={reactKey}>
-          <MQaEntry q={entry.q} a={entry.a} citation={entry.citation} suggestions={entry.suggestions} show={isLastEntryOfLastBlock} onSuggestionClick={onSuggestionClick} />
+        <div className="m-msg-block" key={key}>
+          <MAssistantEntry
+            text={item.synthetic.text}
+            suggestions={item.synthetic.suggestions}
+            show={true}
+            onSuggestionClick={(si, s) => handleSuggestion(s.action)}
+            onStreamDone={() => advanceIfCurrent(index)}
+          />
         </div>
       );
     }
+
+    if (item.kind === "refine-prompt") {
+      return (
+        <div className="m-msg-block" key={key}>
+          <div className="m-bubble">Want to tweak anything before I send this to your advisor?</div>
+          <div className="m-suggestions">
+            {Object.keys(REFINE_FIELD_META).map((field) => (
+              <button key={field} type="button" className="m-suggestion-chip" onClick={() => changeField(field)}>
+                Change {REFINE_FIELD_META[field].label}
+              </button>
+            ))}
+            <button type="button" className="m-suggestion-chip m-suggestion-chip--primary" onClick={() => dispatch({ type: "SEND_TO_ADVISOR" })}>
+              That's perfect, send it →
+            </button>
+          </div>
+          {expandedField && (
+            <div className="m-suggestions" style={{ marginTop: 8 }}>
+              {REFINE_FIELD_META[expandedField].options().map((val) => (
+                <button key={val} type="button" className="m-suggestion-chip" onClick={() => setOverride(expandedField, val)}>
+                  {val}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // refine-sent
     return (
-      <div className="m-msg-block" key={reactKey}>
-        <MAssistantEntry text={entry.text} citation={entry.citation} suggestions={entry.suggestions} show={isLastEntryOfLastBlock} onSuggestionClick={onSuggestionClick} />
+      <div className="m-msg-block" key={key}>
+        <div className="m-bubble">
+          <StreamedText
+            text={`Your config: ${rec.line}, ${rec.gridSize}, ${state.answers.power || "power TBD"}, ${rec.hood === "None" ? "no hood needed" : rec.hood || "hood TBD"}, ${rec.stand}, ${rec.rack}. A Rational advisor will reach out to confirm pricing, lead time, and installation logistics — nothing is ordered automatically.`}
+            onDone={() => advanceIfCurrent(index)}
+          />
+        </div>
       </div>
     );
   }
 
-  const lastBlockIdx = blocks.length - 1;
+  const visibleQueue = queue.slice(0, revealCount);
 
   return (
     <div className="m-sheet m-sheet-chat">
       <div className="m-chat-card">
         <div className="m-chat-conversation" ref={scrollRef}>
-          {blocks.map((block, bi) => {
-            const isLastBlock = bi === lastBlockIdx;
-            return (
-              <div key={block.key}>
-                {block.entries.map((entry, i) =>
-                  renderEntry(entry, i, block.key, `${block.key}-${i}`, isLastBlock && i === block.entries.length - 1 && !block.synthetic)
-                )}
-                {block.synthetic && isLastBlock && (
-                  <div className="m-msg-block">
-                    <MAssistantEntry
-                      text={block.synthetic.text}
-                      suggestions={block.synthetic.suggestions}
-                      show={true}
-                      onSuggestionClick={(si, s) => handleSuggestion(s.action)}
-                    />
-                  </div>
-                )}
-                {block.isRefine && block.entries.length > 0 && (
-                  <div className="m-msg-block">
-                    {!state.sentToAdvisor ? (
-                      <>
-                        <div className="m-bubble">Want to tweak anything before I send this to your advisor?</div>
-                        <div className="m-suggestions">
-                          {Object.keys(REFINE_FIELD_META).map((field) => (
-                            <button key={field} type="button" className="m-suggestion-chip" onClick={() => changeField(field)}>
-                              Change {REFINE_FIELD_META[field].label}
-                            </button>
-                          ))}
-                          <button type="button" className="m-suggestion-chip m-suggestion-chip--primary" onClick={() => dispatch({ type: "SEND_TO_ADVISOR" })}>
-                            That's perfect, send it →
-                          </button>
-                        </div>
-                        {expandedField && (
-                          <div className="m-suggestions" style={{ marginTop: 8 }}>
-                            {REFINE_FIELD_META[expandedField].options().map((val) => (
-                              <button key={val} type="button" className="m-suggestion-chip" onClick={() => setOverride(expandedField, val)}>
-                                {val}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="m-bubble">
-                        <StreamedText
-                          text={`Your config: ${rec.line}, ${rec.gridSize}, ${state.answers.power || "power TBD"}, ${rec.hood === "None" ? "no hood needed" : rec.hood || "hood TBD"}, ${rec.stand}, ${rec.rack}. A Rational advisor will reach out to confirm pricing, lead time, and installation logistics — nothing is ordered automatically.`}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {visibleQueue.map((item, i) => renderQueueItem(item, i, i === queue.length - 1))}
           <div ref={spacerRef} className="m-chat-spacer" aria-hidden="true" />
         </div>
 

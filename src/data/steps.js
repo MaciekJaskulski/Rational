@@ -176,6 +176,11 @@ export const STEPS = [
           { q: "Mobile or fixed — does it matter?", a: "Mobile is more flexible day-to-day (easier cleaning access, easier to reposition); fixed is sturdier for a line that never moves. Either handles a 10 or 20-Grid fine." },
           { q: "Do I need extra clearance around the unit?", a: "A little more than countertop installs, mainly so it can be rolled out for deep cleaning if you choose a mobile stand." },
           { q: "Can I reposition it later if my layout changes?", a: "Yes, if you choose the mobile stand — that's exactly what it's designed for." },
+          {
+            q: "What are the dimensions of this stand?",
+            a: "The castor version measures about 34¾\"W × 30″D × 27½\"H (883 × 760 × 699 mm) and weighs around 76 lb (34.4 kg) on its own — rated for up to 600 kg on the equivalent fixed frame, so it's built for the oven's full weight.",
+            citation: { label: "RATIONAL Stand II, Angila Catering Equipment", url: "https://angliacateringequipment.com/product/rational-stand-ii-for-icombi-pro-icombi-classic-6-1-1-10-1-1/" },
+          },
         ],
       },
       {
@@ -222,7 +227,9 @@ export const STEPS = [
             id: "gas",
             label: "Gas",
             sublabel: "Gas connection with electric ignition",
-            factBubble: "Gas units need a certified gas-safe installer and a compliant flue — factor that into your install timeline.",
+            factBubble:
+              "Gas draws far less electrical power than electric — about 0.6 kW vs. 10.8 kW at this grid size, since heat comes from the burner rather than electric elements — but the gas unit runs roughly 30 lb heavier and needs its own gas connection (typically 3/4\") alongside a certified gas-safe installer and compliant flue.",
+            citation: { label: "RATIONAL iCombi Pro 6-Grid Datasheet", url: "https://www.webstaurantstore.com/documents/specsheets/pro_6-half.pdf" },
             suggestions: [
               { q: "Do I need a professional installer for this?", a: "Yes — gas connections and flue work both require certified trades, same as the extraction hood if you need one." },
               { q: "Can I switch to electric to simplify the install?", a: "Yes — electric-only, hoodless installs are the fastest path if timeline matters more than fuel type." },

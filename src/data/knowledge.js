@@ -1,3 +1,5 @@
+import { translate } from "../i18n/dictionary";
+
 // Zoe's "extra knowledge" layer — compare + cited support answers.
 // Every citation URL below was actually navigated to and confirmed live by a
 // research pass against rational-online.com — never fabricated. Grid specs
@@ -10,7 +12,20 @@ export const SUPPORT_TOPICS = [
   {
     id: "installation",
     prompt: "How does installation work?",
-    keywords: ["install", "installation", "ventilation", "hookup", "hook up", "site prep", "electrical requirement", "extraction"],
+    keywords: [
+      "install",
+      "installation",
+      "ventilation",
+      "hookup",
+      "hook up",
+      "site prep",
+      "electrical requirement",
+      "extraction",
+      "montage",
+      "lüftung",
+      "absaugung",
+      "anschluss",
+    ],
     answer:
       "RATIONAL combi ovens are delivered and installed by certified RATIONAL Service Partners, including a free on-site Unit Introduction so your team is walked through the system before it's used commercially. If you don't have existing extraction, RATIONAL's UltraVent recirculating hoods use condensation technology to trap steam and vapors — no external ductwork required, and retrofitting is always possible.",
     citation: { label: "RATIONAL — Installation & Unit Introduction", url: "https://www.rational-online.com/en_us/customercare/customercareplus/index.php" },
@@ -18,7 +33,7 @@ export const SUPPORT_TOPICS = [
   {
     id: "warranty",
     prompt: "What's the warranty on this?",
-    keywords: ["warranty", "warrant", "guarantee"],
+    keywords: ["warranty", "warrant", "guarantee", "garantie", "gewährleistung"],
     answer:
       "New RATIONAL units and accessories carry a 2-year manufacturer warranty (12 months on used, demo, or training units sold from RATIONAL's own stock). Registering your device with ConnectedCooking right after installation speeds up any warranty claim.",
     citation: { label: "RATIONAL Manufacturer Warranty Statement", url: "https://www.rational-online.com/en_us/customercare/downloads/manufacturer-warranty-statement/" },
@@ -26,7 +41,7 @@ export const SUPPORT_TOPICS = [
   {
     id: "service",
     prompt: "Tell me more about service",
-    keywords: ["service", "maintenance", "connectedcooking", "connected cooking", "care system", "cleaning cycle"],
+    keywords: ["service", "maintenance", "connectedcooking", "connected cooking", "care system", "cleaning cycle", "wartung", "reinigung"],
     answer:
       "Ongoing service runs through RATIONAL's network of 1,200+ certified Service Partners, with 24/7 coverage and re-audited every 18 months. ServicePlus also bundles free software updates, the ConnectedCooking remote-monitoring platform, and ChefLine — RATIONAL chefs on the phone 365 days a year for cooking questions.",
     citation: { label: "RATIONAL Service Partners", url: "https://www.rational-online.com/en_us/customercare/rational-service-partner/" },
@@ -34,7 +49,7 @@ export const SUPPORT_TOPICS = [
   {
     id: "support",
     prompt: "What about customer support?",
-    keywords: ["support", "contact", "help desk", "customer service", "reach rational", "phone number", "chefline"],
+    keywords: ["support", "contact", "help desk", "customer service", "reach rational", "phone number", "chefline", "kundendienst", "kontakt"],
     answer:
       "You can reach RATIONAL through ChefLine for cooking/application questions, a dedicated Technical Support form for equipment issues, or a general callback request — RATIONAL Service Partners also guarantee spare-parts supply and emergency coverage after hours and on weekends.",
     citation: { label: "RATIONAL Contact & Technical Support", url: "https://www.rational-online.com/en_us/customercare/contact-us/" },
@@ -56,7 +71,7 @@ export function supportFollowUps(excludeId, limit = 3) {
 }
 
 export function isCompareQuery(text) {
-  return /\bcompar|\bdifference\b|\bdiffer\b/i.test(text);
+  return /\bcompar|\bdifference\b|\bdiffer\b|\bvergleich|\bunterschied/i.test(text);
 }
 
 // Real spec-sheet facts (electric versions), 1/1 GN "half size" line — same
@@ -77,7 +92,7 @@ const SIZE_ALIASES = [
 ];
 
 const LINE_ALIASES = [
-  { re: /\bclassic\b/i, line: "iCombi Classic" },
+  { re: /\bclassic\b|\bklassisch\b/i, line: "iCombi Classic" },
   { re: /\bpro\b/i, line: "iCombi Pro" },
 ];
 
@@ -102,17 +117,26 @@ function extractPairs(text, fallbackLine) {
 
 // Builds a comparison response. Falls back to Pro vs Classic at the user's
 // current grid size when the message doesn't name two specific sizes.
-export function buildComparison(text, rec) {
+export function buildComparison(text, rec, lang = "en") {
+  const proVsClassic = translate(PRO_VS_CLASSIC, lang);
   const pairs = extractPairs(text, rec.line);
   if (pairs.length >= 2) {
     const [a, b] = pairs;
     if (a.size === b.size) {
-      return `${a.line} vs ${b.line} at ${a.size}: ${PRO_VS_CLASSIC} Dimensions, weight, and capacity are identical between the two at this size — it's the same cabinet.`;
+      return lang === "de"
+        ? `${a.line} vs. ${b.line} beim ${a.size}: ${proVsClassic} Maße, Gewicht und Kapazität sind bei dieser Größe zwischen beiden identisch — es ist dasselbe Gehäuse.`
+        : `${a.line} vs ${b.line} at ${a.size}: ${proVsClassic} Dimensions, weight, and capacity are identical between the two at this size — it's the same cabinet.`;
     }
     const fa = GRID_FACTS[a.size];
     const fb = GRID_FACTS[b.size];
-    return `${a.line} ${a.size} vs ${b.line} ${b.size}: the ${a.size} holds ${fa.pans} (${fa.dims}, ${fa.weight}, ${fa.power}), while the ${b.size} holds ${fb.pans} (${fb.dims}, ${fb.weight}, ${fb.power}). Same control logic across sizes, so staff don't need retraining if you size up later.`;
+    const faPans = translate(fa.pans, lang);
+    const fbPans = translate(fb.pans, lang);
+    return lang === "de"
+      ? `${a.line} ${a.size} vs. ${b.line} ${b.size}: Das ${a.size} fasst ${faPans} (${fa.dims}, ${fa.weight}, ${fa.power}), während das ${b.size} ${fbPans} fasst (${fb.dims}, ${fb.weight}, ${fb.power}). Gleiche Bedienlogik über alle Größen hinweg, sodass bei einem späteren Upsizing keine Umschulung nötig ist.`
+      : `${a.line} ${a.size} vs ${b.line} ${b.size}: the ${a.size} holds ${faPans} (${fa.dims}, ${fa.weight}, ${fa.power}), while the ${b.size} holds ${fbPans} (${fb.dims}, ${fb.weight}, ${fb.power}). Same control logic across sizes, so staff don't need retraining if you size up later.`;
   }
   const size = pairs[0]?.size || rec.gridSize || "10-Grid";
-  return `iCombi Classic vs iCombi Pro at ${size}: ${PRO_VS_CLASSIC} Dimensions, weight, and capacity are identical between the two at this size — it's the same cabinet. Right now you're tracking toward ${rec.line} (score ${rec.score}).`;
+  return lang === "de"
+    ? `iCombi Classic vs. iCombi Pro beim ${size}: ${proVsClassic} Maße, Gewicht und Kapazität sind bei dieser Größe zwischen beiden identisch — es ist dasselbe Gehäuse. Aktuell tendieren Sie zu ${rec.line} (Score ${rec.score}).`
+    : `iCombi Classic vs iCombi Pro at ${size}: ${proVsClassic} Dimensions, weight, and capacity are identical between the two at this size — it's the same cabinet. Right now you're tracking toward ${rec.line} (score ${rec.score}).`;
 }

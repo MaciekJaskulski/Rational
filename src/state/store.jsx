@@ -3,6 +3,8 @@ import { STEPS } from "../data/steps";
 import { findOption, computeRecommendation } from "../data/engine";
 import { inferFromText } from "../data/nlu";
 import { matchSupportTopic, isCompareQuery, buildComparison, supportFollowUps, PRO_VS_CLASSIC, SUPPORT_TOPICS } from "../data/knowledge";
+import { translate } from "../i18n/dictionary";
+import { freeTextRecapMessage, upsizeMessage, whyMessage } from "../i18n/messages";
 
 const STEP4 = STEPS[3];
 
@@ -132,7 +134,7 @@ function nudgeSuggestions(nudge) {
 function reducer(state, action) {
   switch (action.type) {
     case "RESTART":
-      return initialState();
+      return { ...initialState(), lang: state.lang };
 
     case "TOGGLE_LANG_EXPAND":
       return { ...state, langExpanded: !state.langExpanded };
@@ -214,7 +216,8 @@ function reducer(state, action) {
         list.push({
           type: "qa",
           q: s.q,
-          a: nudge ? `${s.a} ${nudge.prompt}` : s.a,
+          a: s.a,
+          appendPrompt: nudge ? nudge.prompt : null,
           citation: s.citation || null,
           suggestions: nudge ? nudgeSuggestions(nudge) : s.topicId ? supportFollowUps(s.topicId) : null,
         });
@@ -238,7 +241,7 @@ function reducer(state, action) {
 
       const supportTopic = matchSupportTopic(text);
       if (isCompareQuery(text)) {
-        answerText = buildComparison(text, rec);
+        answerText = buildComparison(text, rec, state.lang);
       } else if (supportTopic) {
         answerText = supportTopic.answer;
         citation = supportTopic.citation;
@@ -273,7 +276,8 @@ function reducer(state, action) {
         // let's move on" meaning as the original confirm chip.
         list.push({
           type: "assistant",
-          text: `${answerText} ${NEXT_STEP_PROMPTS[1]}`,
+          text: answerText,
+          appendPrompt: NEXT_STEP_PROMPTS[1],
           citation,
           suggestions: [
             { q: "Yes, let's continue", a: null, action: "pathc:confirm" },
@@ -287,7 +291,8 @@ function reducer(state, action) {
         const nudge = nudgeForState(state);
         list.push({
           type: "assistant",
-          text: nudge ? `${answerText} ${nudge.prompt}` : answerText,
+          text: answerText,
+          appendPrompt: nudge ? nudge.prompt : null,
           citation,
           suggestions: nudge ? nudgeSuggestions(nudge) : matchedTopicId ? supportFollowUps(matchedTopicId) : null,
         });
@@ -372,7 +377,8 @@ function reducer(state, action) {
           const nudge = nudgeForState(state);
           chatByStep = pushChat(chatByStep, "refine", {
             type: "fact",
-            text: nudge ? `${text} ${nudge.prompt}` : text,
+            text,
+            appendPrompt: nudge ? nudge.prompt : null,
             suggestions: nudge ? nudgeSuggestions(nudge) : null,
           });
         } else {
@@ -416,7 +422,13 @@ function reducer(state, action) {
       let chatByStep = pushChat(state.chatByStep, "meals", { type: "user", text });
       chatByStep = pushChat(chatByStep, "meals", {
         type: "assistant",
-        text: `Got it — sounds like a ${inference.businessLabel} doing a ${inference.confidence.toLowerCase()}-confidence estimate around ${mealsOpt.label.toLowerCase()}. I've started you off with an ${rec.line} ${gridWord} based on that — say the word if any of this is off.`,
+        text: freeTextRecapMessage(state.lang, {
+          businessLabel: inference.businessLabel,
+          confidence: inference.confidence,
+          mealsLabel: mealsOpt.label,
+          line: rec.line,
+          gridWord,
+        }),
         suggestions: [
           { q: "That's about right", a: null, action: "pathc:confirm" },
           { q: "Actually, more like 80+ covers", a: null, action: "pathc:upsize" },
@@ -448,7 +460,7 @@ function reducer(state, action) {
       const rec = computeRecommendation(answers);
       const chatByStep = pushChat(state.chatByStep, "meals", {
         type: "assistant",
-        text: `Got it, bumping you to a ${rec.gridSize} ${rec.line} — that extra volume is exactly where Pro's sensor-adjusted cooking and automated cleaning earn their keep.`,
+        text: upsizeMessage(state.lang, { gridSize: rec.gridSize, line: rec.line }),
       });
       const advanced = advanceToNextStep({ ...state, answers, chatByStep });
       return { ...advanced, pathC: { ...state.pathC, stage: "stepping" } };
@@ -458,7 +470,7 @@ function reducer(state, action) {
       const inference = state.pathC.inference;
       let chatByStep = pushChat(state.chatByStep, "meals", {
         type: "assistant",
-        text: inference.reason + " — but tell me if your setup's bigger and I'll adjust.",
+        text: whyMessage(state.lang, inference.reason),
         suggestions: [
           { q: "That's about right", a: null, action: "pathc:confirm" },
           { q: "Actually, more like 80+ covers", a: null, action: "pathc:upsize" },
@@ -495,4 +507,13 @@ export function useAppDispatch() {
 export function useRecommendation() {
   const state = useAppState();
   return computeRecommendation(state.answers, state.overrides);
+}
+
+// Returns a `t(text)` translator bound to the current language — pass any
+// English source string used elsewhere in the app and get back its German
+// translation when state.lang is "de" (or the original text otherwise/as a
+// safe fallback for anything not yet in the dictionary).
+export function useT() {
+  const state = useAppState();
+  return (text) => translate(text, state.lang);
 }

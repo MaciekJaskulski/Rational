@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useAppState, useRecommendation } from "../state/store";
+import { useAppState, useRecommendation, useT } from "../state/store";
 import { PRODUCT_IMAGES, PRODUCT_IMAGE_FALLBACK, ACCESSORY_IMAGES, slugify } from "../assets/images";
 import ThreeDModal from "./ThreeDModal";
 
@@ -16,12 +16,13 @@ export function getAddonTiles(rec) {
 export default function ProductPreview({ variant, force }) {
   const state = useAppState();
   const rec = useRecommendation();
+  const t = useT();
   const [show3d, setShow3d] = useState(false);
 
   if (!force && !state.productPreviewShown) return null;
 
   const name = rec.gridSize ? `${rec.line} ${rec.gridSize}` : rec.line;
-  const sub = rec.rack || "Rack — pending";
+  const sub = rec.rack ? t(rec.rack) : t("Rack — pending");
   const image = PRODUCT_IMAGES[rec.gridSize] || PRODUCT_IMAGE_FALLBACK;
   const isSummary = variant === "summary";
   // Show addon tiles as soon as they're set, same as mobile's product zone —
@@ -41,7 +42,7 @@ export default function ProductPreview({ variant, force }) {
             <img key={image} src={image} alt={name} className="product-img" />
           </div>
           <button type="button" className="threed-btn" onClick={() => setShow3d(true)}>
-            3D view
+            {t("3D view")}
           </button>
           {!isSummary && (
             <div className="product-tag">
@@ -60,7 +61,7 @@ export default function ProductPreview({ variant, force }) {
                   <div className="addon-picture">
                     {img ? <img src={img} alt={addon.label} className="addon-img" /> : <div className="addon-placeholder" aria-hidden="true" />}
                   </div>
-                  {!isSummary && <div className="addon-tag">{addon.label}</div>}
+                  {!isSummary && <div className="addon-tag">{t(addon.label)}</div>}
                 </div>
               );
             })}

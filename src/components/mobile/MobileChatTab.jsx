@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { STEPS } from "../../data/steps";
-import { useAppState, useAppDispatch, useRecommendation } from "../../state/store";
+import { useAppState, useAppDispatch, useRecommendation, useT } from "../../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../../data/engine";
 import StreamedText from "../chat/StreamedText";
 import resolveAction from "../chat/resolveAction";
@@ -20,6 +20,7 @@ const REFINE_FIELD_META = {
 // bubble that isn't persisted anywhere (mirrors the step's title/options).
 function useConversationBlocks() {
   const state = useAppState();
+  const t = useT();
   const blocks = [];
   const upTo = state.screen === "guided" ? state.currentStep : 4;
 
@@ -30,7 +31,7 @@ function useConversationBlocks() {
 
     if (step.options) {
       const answered = !!state.answers[step.key];
-      const synthetic = isCurrent && !answered ? { text: step.title, suggestions: step.options.map((o) => ({ q: o.label, action: `select:${step.id}:${o.id}` })) } : null;
+      const synthetic = isCurrent && !answered ? { text: t(step.title), suggestions: step.options.map((o) => ({ q: t(o.label), action: `select:${step.id}:${o.id}` })) } : null;
       blocks.push({ key: step.key, entries, synthetic });
     } else if (step.subQuestions) {
       const powerDone = !!state.answers.power;
@@ -43,9 +44,12 @@ function useConversationBlocks() {
       const ventilationGateOpen = !state.pathC.active || state.pathC.ventilationUnlocked;
       let synthetic = null;
       if (isCurrent && !powerDone) {
-        synthetic = { text: "What's your power connection — electric or gas?", suggestions: step.subQuestions[0].options.map((o) => ({ q: o.label, action: `subselect:power:${o.id}` })) };
+        synthetic = { text: t("What's your power connection — electric or gas?"), suggestions: step.subQuestions[0].options.map((o) => ({ q: t(o.label), action: `subselect:power:${o.id}` })) };
       } else if (isCurrent && !ventDone && ventilationGateOpen) {
-        synthetic = { text: "And what about ventilation — do you already have extraction, or will you need a hood?", suggestions: step.subQuestions[1].options.map((o) => ({ q: o.label, action: `subselect:ventilation:${o.id}` })) };
+        synthetic = {
+          text: t("And what about ventilation — do you already have extraction, or will you need a hood?"),
+          suggestions: step.subQuestions[1].options.map((o) => ({ q: t(o.label), action: `subselect:ventilation:${o.id}` })),
+        };
       }
       blocks.push({ key: step.key, entries, synthetic });
     }
@@ -99,6 +103,7 @@ function isInstantKind(item) {
 // from the local `done` used for suggestion-gating) advances the reveal
 // queue so the next queued message can start.
 function MSuggestions({ done, show, suggestions, onClick }) {
+  const t = useT();
   if (!show || !done || !suggestions || suggestions.length === 0) return null;
   // `hidden` suggestions stay in the array (so the free-text fuzzy matcher
   // can still find them) but never render as a chip — `si` must stay the
@@ -109,7 +114,7 @@ function MSuggestions({ done, show, suggestions, onClick }) {
       {suggestions.map((s, si) =>
         s.hidden ? null : (
           <button key={si} type="button" className="m-suggestion-chip" onClick={() => onClick(si, s)}>
-            {s.q}
+            {t(s.q)}
           </button>
         )
       )}
@@ -117,7 +122,14 @@ function MSuggestions({ done, show, suggestions, onClick }) {
   );
 }
 
-function MQaEntry({ q, a, citation, suggestions, show, onSuggestionClick, onStreamDone }) {
+// See ChatPanel.jsx's identical helper — combines a message's text with its
+// optional trailing nudge prompt AFTER translating each piece separately.
+function displayText(t, text, appendPrompt) {
+  return appendPrompt ? `${t(text)} ${t(appendPrompt)}` : t(text);
+}
+
+function MQaEntry({ q, a, appendPrompt, citation, suggestions, show, onSuggestionClick, onStreamDone }) {
+  const t = useT();
   const [done, setDone] = useState(false);
   function handleDone() {
     setDone(true);
@@ -125,16 +137,17 @@ function MQaEntry({ q, a, citation, suggestions, show, onSuggestionClick, onStre
   }
   return (
     <>
-      <div className="m-bubble-user">{q}</div>
+      <div className="m-bubble-user">{t(q)}</div>
       <div className="m-bubble" style={{ marginTop: 6 }}>
-        <StreamedText text={a} after={<Citation citation={citation} />} onDone={handleDone} />
+        <StreamedText text={displayText(t, a, appendPrompt)} after={<Citation citation={citation} />} onDone={handleDone} />
       </div>
       <MSuggestions done={done} show={show} suggestions={suggestions} onClick={onSuggestionClick} />
     </>
   );
 }
 
-function MAssistantEntry({ text, citation, suggestions, show, onSuggestionClick, onStreamDone }) {
+function MAssistantEntry({ text, appendPrompt, citation, suggestions, show, onSuggestionClick, onStreamDone }) {
+  const t = useT();
   const [done, setDone] = useState(false);
   function handleDone() {
     setDone(true);
@@ -143,7 +156,7 @@ function MAssistantEntry({ text, citation, suggestions, show, onSuggestionClick,
   return (
     <>
       <div className="m-bubble">
-        <StreamedText text={text} after={<Citation citation={citation} />} onDone={handleDone} />
+        <StreamedText text={displayText(t, text, appendPrompt)} after={<Citation citation={citation} />} onDone={handleDone} />
       </div>
       <MSuggestions done={done} show={show} suggestions={suggestions} onClick={onSuggestionClick} />
     </>
@@ -174,6 +187,7 @@ export default function MobileChatTab() {
   const state = useAppState();
   const dispatch = useAppDispatch();
   const rec = useRecommendation();
+  const t = useT();
   const blocks = useConversationBlocks();
   const queue = buildQueue(blocks, state.sentToAdvisor, state.pathC.active);
   const [text, setText] = useState("");
@@ -282,7 +296,7 @@ export default function MobileChatTab() {
         return (
           <div className="m-msg-block" key={key}>
             <div className="m-bubble m-bubble-transition">
-              <StreamedText text={entry.text} onDone={() => advanceIfCurrent(index)} />
+              <StreamedText text={t(entry.text)} onDone={() => advanceIfCurrent(index)} />
             </div>
           </div>
         );
@@ -290,7 +304,7 @@ export default function MobileChatTab() {
       if (entry.type === "user") {
         return (
           <div className="m-msg-block" key={key}>
-            <div className="m-bubble-user">{entry.text}</div>
+            <div className="m-bubble-user">{t(entry.text)}</div>
           </div>
         );
       }
@@ -311,6 +325,7 @@ export default function MobileChatTab() {
             <MQaEntry
               q={entry.q}
               a={entry.a}
+              appendPrompt={entry.appendPrompt}
               citation={entry.citation}
               suggestions={entry.suggestions}
               show={isLast}
@@ -324,6 +339,7 @@ export default function MobileChatTab() {
         <div className="m-msg-block" key={key}>
           <MAssistantEntry
             text={entry.text}
+            appendPrompt={entry.appendPrompt}
             citation={entry.citation}
             suggestions={entry.suggestions}
             show={isLast}
@@ -354,22 +370,22 @@ export default function MobileChatTab() {
     if (item.kind === "refine-prompt") {
       return (
         <div className="m-msg-block" key={key}>
-          <div className="m-bubble">Want to tweak anything before I send this to your advisor?</div>
+          <div className="m-bubble">{t("Want to tweak anything before I send this to your advisor?")}</div>
           <div className="m-suggestions">
             {Object.keys(REFINE_FIELD_META).map((field) => (
               <button key={field} type="button" className="m-suggestion-chip" onClick={() => changeField(field)}>
-                Change {REFINE_FIELD_META[field].label}
+                {state.lang === "de" ? `${t(REFINE_FIELD_META[field].label)} ändern` : `Change ${REFINE_FIELD_META[field].label}`}
               </button>
             ))}
             <button type="button" className="m-suggestion-chip m-suggestion-chip--primary" onClick={() => dispatch({ type: "SEND_TO_ADVISOR" })}>
-              That's perfect, send it →
+              {t("That's perfect, send it →")}
             </button>
           </div>
           {expandedField && (
             <div className="m-suggestions" style={{ marginTop: 8 }}>
               {REFINE_FIELD_META[expandedField].options().map((val) => (
                 <button key={val} type="button" className="m-suggestion-chip" onClick={() => setOverride(expandedField, val)}>
-                  {val}
+                  {t(val)}
                 </button>
               ))}
             </div>
@@ -381,16 +397,16 @@ export default function MobileChatTab() {
     if (item.kind === "refine-pathc-actions") {
       return (
         <div className="m-msg-block" key={key}>
-          <div className="m-bubble">Ready to bring this all together?</div>
+          <div className="m-bubble">{t("Ready to bring this all together?")}</div>
           <div className="m-suggestions">
             <button type="button" className="m-suggestion-chip m-suggestion-chip--primary" onClick={() => dispatch({ type: "SET_MOBILE_TAB", tab: "guided" })}>
-              Let me review my setup
+              {t("Let me review my setup")}
             </button>
             <button type="button" className="m-suggestion-chip">
-              Save as PDF
+              {t("Save as PDF")}
             </button>
             <a className="m-suggestion-chip" href="https://www.rational-online.com/en_gb/customercare/rational-dealer/" target="_blank" rel="noreferrer">
-              Find a local dealer
+              {t("Find a local dealer")}
             </a>
           </div>
         </div>
@@ -398,13 +414,15 @@ export default function MobileChatTab() {
     }
 
     // refine-sent
+    const powerLabel = state.answers.power ? t(state.answers.power) : t("power TBD");
+    const hoodLabel = rec.hood === "None" ? t("no hood needed") : rec.hood ? t(rec.hood) : t("hood TBD");
+    const sentText = `${t("Your config:")} ${rec.line}, ${rec.gridSize}, ${powerLabel}, ${hoodLabel}, ${rec.stand ? t(rec.stand) : rec.stand}, ${
+      rec.rack ? t(rec.rack) : rec.rack
+    }. ${t("A Rational advisor will reach out to confirm pricing, lead time, and installation logistics — nothing is ordered automatically.")}`;
     return (
       <div className="m-msg-block" key={key}>
         <div className="m-bubble">
-          <StreamedText
-            text={`Your config: ${rec.line}, ${rec.gridSize}, ${state.answers.power || "power TBD"}, ${rec.hood === "None" ? "no hood needed" : rec.hood || "hood TBD"}, ${rec.stand}, ${rec.rack}. A Rational advisor will reach out to confirm pricing, lead time, and installation logistics — nothing is ordered automatically.`}
-            onDone={() => advanceIfCurrent(index)}
-          />
+          <StreamedText text={sentText} onDone={() => advanceIfCurrent(index)} />
         </div>
       </div>
     );
@@ -422,15 +440,25 @@ export default function MobileChatTab() {
 
         <div className="m-chat-input-row" style={{ transform: keyboardInset ? `translateY(-${keyboardInset}px)` : "none" }}>
           <div className="m-chips">
-            {rec.gridSize && <span className="m-chip active">Model: {rec.gridSize}</span>}
-            <span className="m-chip">Hood: {rec.hood || "—"}</span>
-            {rec.rack && <span className="m-chip">Rack: {rec.rack}</span>}
+            {rec.gridSize && (
+              <span className="m-chip active">
+                {t("Model:")} {rec.gridSize}
+              </span>
+            )}
+            <span className="m-chip">
+              {t("Hood:")} {rec.hood ? t(rec.hood) : "—"}
+            </span>
+            {rec.rack && (
+              <span className="m-chip">
+                {t("Rack:")} {t(rec.rack)}
+              </span>
+            )}
           </div>
           <div className="m-chat-input">
             <input
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Ask anything"
+              placeholder={t("Ask anything")}
               onKeyDown={(e) => {
                 if (e.key === "Enter") submit();
               }}

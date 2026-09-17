@@ -1,10 +1,11 @@
-import { useAppState, useAppDispatch } from "../../state/store";
+import { useAppState, useAppDispatch, useT } from "../../state/store";
 
 export default function MobileHeader({ activeTab, onTabChange }) {
   const state = useAppState();
   const dispatch = useAppDispatch();
+  const t = useT();
 
-  const stepLabel = state.screen === "guided" ? `STEP ${state.currentStep} OF 6` : null;
+  const stepLabel = state.screen === "guided" ? (state.lang === "de" ? `SCHRITT ${state.currentStep} VON 6` : `STEP ${state.currentStep} OF 6`) : null;
 
   return (
     <div className="m-nav">
@@ -16,16 +17,16 @@ export default function MobileHeader({ activeTab, onTabChange }) {
             {state.lang.toUpperCase()}
           </button>
           <button type="button" className="m-restart-btn" onClick={() => dispatch({ type: "RESTART" })}>
-            Restart
+            {t("Restart")}
           </button>
         </div>
       </div>
       <div className="m-tabbar">
         <button type="button" className={`m-tab ${activeTab === "guided" ? "active" : ""}`} onClick={() => onTabChange("guided")}>
-          Guided selling
+          {t("Guided selling")}
         </button>
         <button type="button" className={`m-tab ${activeTab === "chat" ? "active" : ""}`} onClick={() => onTabChange("chat")}>
-          <span className="m-tab-icon">✨</span> Talk about it
+          <span className="m-tab-icon">✨</span> {t("Talk about it")}
         </button>
       </div>
     </div>

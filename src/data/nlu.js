@@ -1,7 +1,7 @@
 // spec §7.2 — slot-inference cheatsheet for free-text intake (Path C). Simple keyword matcher.
 export const INFERENCE_CHEATSHEET = [
   {
-    cues: ["steakhouse", "steak house"],
+    cues: ["steakhouse", "steak house", "steakhaus"],
     meals: "up_to_30",
     focus: "ala_carte",
     footprint: "compact",
@@ -11,7 +11,7 @@ export const INFERENCE_CHEATSHEET = [
       "Steakhouse kitchens are usually à la carte and compact by nature, and 'small' usually means a modest cover count",
   },
   {
-    cues: ["food truck"],
+    cues: ["food truck", "imbisswagen"],
     meals: "up_to_30",
     focus: "ala_carte",
     footprint: "compact",
@@ -20,7 +20,7 @@ export const INFERENCE_CHEATSHEET = [
     reason: "Food trucks run tight, fast-turnaround menus in a very small footprint",
   },
   {
-    cues: ["bakery", "pastry shop", "patisserie"],
+    cues: ["bakery", "pastry shop", "patisserie", "bäckerei", "backerei", "konditorei"],
     meals: "30_80",
     focus: "baking",
     footprint: "standard",
@@ -29,7 +29,7 @@ export const INFERENCE_CHEATSHEET = [
     reason: "Bakeries run steady batch volumes centered on proofing and bake consistency",
   },
   {
-    cues: ["banquet hall", "catering company", "catering", "banquet"],
+    cues: ["banquet hall", "catering company", "catering", "banquet", "bankett", "cateringunternehmen"],
     meals: "80_150",
     focus: "banqueting",
     footprint: "generous",
@@ -38,7 +38,7 @@ export const INFERENCE_CHEATSHEET = [
     reason: "Banquet and catering operations run large batches held at temperature for service",
   },
   {
-    cues: ["hotel restaurant", "full-service restaurant", "hotel"],
+    cues: ["hotel restaurant", "full-service restaurant", "hotel", "hotelrestaurant"],
     meals: "30_80",
     focus: "mixed",
     footprint: "standard",
@@ -47,7 +47,7 @@ export const INFERENCE_CHEATSHEET = [
     reason: "Hotels vary widely, so this is a soft default",
   },
   {
-    cues: ["busy diner", "quick-service chain", "diner", "qsr"],
+    cues: ["busy diner", "quick-service chain", "diner", "qsr", "schnellrestaurant", "imbiss"],
     meals: "80_150",
     focus: "ala_carte",
     footprint: "standard",
@@ -66,14 +66,14 @@ export function inferFromText(text) {
 export function detectPower(text) {
   const lower = text.toLowerCase();
   if (lower.includes("gas")) return "gas";
-  if (lower.includes("electric")) return "electric";
+  if (lower.includes("electric") || lower.includes("elektrisch") || lower.includes("strom")) return "electric";
   return null;
 }
 
 export function detectVentilation(text) {
   const lower = text.toLowerCase();
-  if (lower.includes("already have extraction") || lower.includes("existing extraction")) return "have_extraction";
-  if (lower.includes("condensation")) return "condensation";
-  if (lower.includes("extraction hood") || lower.includes("full extraction")) return "extraction";
+  if (lower.includes("already have extraction") || lower.includes("existing extraction") || lower.includes("bereits") && lower.includes("absaugung")) return "have_extraction";
+  if (lower.includes("condensation") || lower.includes("kondensation")) return "condensation";
+  if (lower.includes("extraction hood") || lower.includes("full extraction") || lower.includes("abzugshaube") || lower.includes("vollabzug")) return "extraction";
   return null;
 }

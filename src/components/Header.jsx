@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAppState, useAppDispatch } from "../state/store";
+import { useAppState, useAppDispatch, useT } from "../state/store";
 
 const STEP_LABELS = [
   "MEALS & VOLUME",
@@ -14,6 +14,7 @@ const STEP_LABELS = [
 export default function Header() {
   const state = useAppState();
   const dispatch = useAppDispatch();
+  const t = useT();
   const langRef = useRef(null);
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export default function Header() {
                 transition={{ type: "spring", stiffness: 400, damping: 32 }}
               >
                 <span className="num">{stepNum}</span>
-                <span className="label">{label}</span>
+                <span className="label">{t(label)}</span>
               </motion.div>
             );
           }
@@ -56,7 +57,7 @@ export default function Header() {
               type="button"
               className={`step-dot ${isVisited ? "visited" : ""}`}
               disabled={!isVisited}
-              title={isVisited ? label : undefined}
+              title={isVisited ? t(label) : undefined}
               onClick={() => isVisited && dispatch({ type: "GOTO_STEP", step: stepNum })}
             />
           );
@@ -88,7 +89,7 @@ export default function Header() {
           </AnimatePresence>
         </div>
         <button className="restart-btn" onClick={() => dispatch({ type: "RESTART" })}>
-          Restart
+          {t("Restart")}
         </button>
       </div>
     </div>

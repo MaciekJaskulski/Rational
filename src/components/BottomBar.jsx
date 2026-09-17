@@ -1,20 +1,24 @@
-import { useAppState, useRecommendation } from "../state/store";
+import { useAppState, useRecommendation, useT } from "../state/store";
 
 export default function BottomBar() {
   const state = useAppState();
   const rec = useRecommendation();
+  const t = useT();
 
   const chips = [];
-  if (rec.gridSize) chips.push({ label: `Model: ${rec.gridSize}`, active: true });
-  chips.push({ label: `Hood: ${rec.hood || "—"}`, active: false });
-  if (rec.rack) chips.push({ label: `Rack: ${rec.rack}`, active: false });
-  if (rec.stand) chips.push({ label: `Stand: ${rec.stand}`, active: false });
+  if (rec.gridSize) chips.push({ label: `${t("Model:")} ${rec.gridSize}`, active: true });
+  chips.push({ label: `${t("Hood:")} ${rec.hood ? t(rec.hood) : "—"}`, active: false });
+  if (rec.rack) chips.push({ label: `${t("Rack:")} ${t(rec.rack)}`, active: false });
+  if (rec.stand) chips.push({ label: `${t("Stand:")} ${t(rec.stand)}`, active: false });
   if (state.answers.power) {
-    const label = state.answers.power === "gas" ? "Gas" : "Electric";
-    chips.push({ label: `Power: ${label}`, active: false });
+    const label = state.answers.power === "gas" ? t("Gas") : t("Electric");
+    chips.push({ label: `${t("Power:")} ${label}`, active: false });
   }
   if (state.accessories.length) {
-    chips.push({ label: `+${state.accessories.length} accessor${state.accessories.length > 1 ? "ies" : "y"}`, active: false });
+    const n = state.accessories.length;
+    const label =
+      state.lang === "de" ? `+${n} Zubehörteil${n > 1 ? "e" : ""}` : `+${n} accessor${n > 1 ? "ies" : "y"}`;
+    chips.push({ label, active: false });
   }
 
   if (state.screen === "summary") return null;

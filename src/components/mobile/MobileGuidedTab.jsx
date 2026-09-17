@@ -1,17 +1,18 @@
 import { STEPS } from "../../data/steps";
-import { useAppState, useAppDispatch, useRecommendation } from "../../state/store";
+import { useAppState, useAppDispatch, useRecommendation, useT } from "../../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../../data/engine";
 
 function StepQuestion() {
   const state = useAppState();
   const dispatch = useAppDispatch();
+  const t = useT();
   const step = STEPS.find((s) => s.id === state.currentStep);
 
   return (
     <>
-      <div className="m-step-label">{step.shortLabel}</div>
-      <h1 className="m-q-title">{step.title}</h1>
-      <p className="m-q-subtitle">{step.subtitle}</p>
+      <div className="m-step-label">{t(step.shortLabel)}</div>
+      <h1 className="m-q-title">{t(step.title)}</h1>
+      <p className="m-q-subtitle">{t(step.subtitle)}</p>
 
       {step.options && (
         <div className="m-options">
@@ -25,8 +26,8 @@ function StepQuestion() {
                 onClick={() => dispatch({ type: "SELECT_OPTION", stepId: step.id, optionId: opt.id })}
               >
                 <div className="m-option-text">
-                  <span className="m-option-title">{opt.label}</span>
-                  <span className="m-option-sub">{opt.sublabel}</span>
+                  <span className="m-option-title">{t(opt.label)}</span>
+                  <span className="m-option-sub">{t(opt.sublabel)}</span>
                 </div>
                 <div className={`m-option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>
               </button>
@@ -39,7 +40,7 @@ function StepQuestion() {
         <div className="m-options">
           {step.subQuestions.map((sub) => (
             <div key={sub.id}>
-              <div className="m-subgroup-label">{sub.label}</div>
+              <div className="m-subgroup-label">{t(sub.label)}</div>
               {sub.options.map((opt) => {
                 const selected = state.answers[sub.id] === opt.id;
                 return (
@@ -51,8 +52,8 @@ function StepQuestion() {
                     onClick={() => dispatch({ type: "SELECT_SUBOPTION", subKey: sub.id, optionId: opt.id })}
                   >
                     <div className="m-option-text">
-                      <span className="m-option-title">{opt.label}</span>
-                      <span className="m-option-sub">{opt.sublabel}</span>
+                      <span className="m-option-title">{t(opt.label)}</span>
+                      <span className="m-option-sub">{t(opt.sublabel)}</span>
                     </div>
                     <div className={`m-option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>
                   </button>
@@ -70,19 +71,22 @@ function RefineFields() {
   const state = useAppState();
   const dispatch = useAppDispatch();
   const rec = useRecommendation();
+  const t = useT();
 
   function set(field, value) {
     dispatch({ type: "SET_OVERRIDE", field, value });
   }
 
   if (state.sentToAdvisor) {
+    const powerLabel = state.answers.power ? t(state.answers.power) : t("power TBD");
+    const hoodLabel = rec.hood === "None" ? t("no hood needed") : rec.hood ? t(rec.hood) : t("hood TBD");
     return (
       <>
-        <div className="m-step-label">ALL SET</div>
-        <h1 className="m-q-title">Sent to your Rational advisor</h1>
+        <div className="m-step-label">{t("ALL SET")}</div>
+        <h1 className="m-q-title">{t("Sent to your Rational advisor")}</h1>
         <p className="m-q-subtitle">
-          Your config: {rec.line}, {rec.gridSize}, {state.answers.power || "power TBD"}, {rec.hood === "None" ? "no hood needed" : rec.hood || "hood TBD"}, {rec.stand}, {rec.rack}.
-          A Rational advisor will reach out to confirm pricing, lead time, and installation logistics — nothing is ordered automatically.
+          {t("Your config:")} {rec.line}, {rec.gridSize}, {powerLabel}, {hoodLabel}, {rec.stand ? t(rec.stand) : rec.stand}, {rec.rack ? t(rec.rack) : rec.rack}.{" "}
+          {t("A Rational advisor will reach out to confirm pricing, lead time, and installation logistics — nothing is ordered automatically.")}
         </p>
       </>
     );
@@ -90,51 +94,51 @@ function RefineFields() {
 
   return (
     <>
-      <div className="m-step-label">REFINE</div>
-      <h1 className="m-q-title">Here's the full build — tweak anything that doesn't fit</h1>
+      <div className="m-step-label">{t("REFINE")}</div>
+      <h1 className="m-q-title">{t("Here's the full build — tweak anything that doesn't fit")}</h1>
       <p className="m-q-subtitle">
         {rec.line} · {rec.gridSize}
-        {rec.gridNote ? ` (${rec.gridNote})` : ""}
+        {rec.gridNote ? ` (${t(rec.gridNote)})` : ""}
       </p>
 
-      {rec.standWarning && <div className="m-warning-banner">{rec.standWarning}</div>}
+      {rec.standWarning && <div className="m-warning-banner">{t(rec.standWarning)}</div>}
 
       <div className="m-refine-field">
-        <label>Grid size</label>
+        <label>{t("Grid size")}</label>
         <div className="m-segmented">
           {gridSizeOptions().map((g) => (
             <button key={g} className={rec.gridSize === g ? "selected" : ""} onClick={() => set("gridSize", g)}>
-              {g}
+              {t(g)}
             </button>
           ))}
         </div>
       </div>
       <div className="m-refine-field">
-        <label>Stand / mount</label>
+        <label>{t("Stand / mount")}</label>
         <div className="m-segmented">
           {standOptions().map((s) => (
             <button key={s} className={rec.stand === s ? "selected" : ""} onClick={() => set("stand", s)}>
-              {s}
+              {t(s)}
             </button>
           ))}
         </div>
       </div>
       <div className="m-refine-field">
-        <label>Rack insert</label>
+        <label>{t("Rack insert")}</label>
         <div className="m-segmented">
           {rackOptions().map((r) => (
             <button key={r} className={rec.rack === r ? "selected" : ""} onClick={() => set("rack", r)}>
-              {r}
+              {t(r)}
             </button>
           ))}
         </div>
       </div>
       <div className="m-refine-field">
-        <label>Ventilation hood</label>
+        <label>{t("Ventilation hood")}</label>
         <div className="m-segmented">
           {hoodOptions().map((h) => (
             <button key={h} className={rec.hood === h ? "selected" : ""} onClick={() => set("hood", h)}>
-              {h}
+              {t(h)}
             </button>
           ))}
         </div>
@@ -146,13 +150,14 @@ function RefineFields() {
 function Chips() {
   const state = useAppState();
   const rec = useRecommendation();
+  const t = useT();
 
   const chips = [];
-  if (rec.gridSize) chips.push({ label: `Model: ${rec.gridSize}`, active: true });
-  chips.push({ label: `Hood: ${rec.hood || "—"}`, active: false });
-  if (rec.rack) chips.push({ label: `Rack: ${rec.rack}`, active: false });
-  if (rec.stand) chips.push({ label: `Stand: ${rec.stand}`, active: false });
-  if (state.answers.power) chips.push({ label: `Power: ${state.answers.power === "gas" ? "Gas" : "Electric"}`, active: false });
+  if (rec.gridSize) chips.push({ label: `${t("Model:")} ${rec.gridSize}`, active: true });
+  chips.push({ label: `${t("Hood:")} ${rec.hood ? t(rec.hood) : "—"}`, active: false });
+  if (rec.rack) chips.push({ label: `${t("Rack:")} ${t(rec.rack)}`, active: false });
+  if (rec.stand) chips.push({ label: `${t("Stand:")} ${t(rec.stand)}`, active: false });
+  if (state.answers.power) chips.push({ label: `${t("Power:")} ${state.answers.power === "gas" ? t("Gas") : t("Electric")}`, active: false });
 
   return (
     <div className="m-chips">

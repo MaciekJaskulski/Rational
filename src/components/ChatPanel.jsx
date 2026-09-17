@@ -1,5 +1,5 @@
 import { useState, useRef, useLayoutEffect } from "react";
-import { useAppDispatch } from "../state/store";
+import { useAppDispatch, useT } from "../state/store";
 import StreamedText from "./chat/StreamedText";
 import resolveAction from "./chat/resolveAction";
 import Citation from "./chat/Citation";
@@ -8,6 +8,7 @@ import Citation from "./chat/Citation";
 // is local to this component instance, which mounts once per message (keyed
 // by position in chatLog), matching StreamedText's own "streams once" model.
 function Suggestions({ done, isLast, suggestions, onClick }) {
+  const t = useT();
   if (!isLast || !done || !suggestions || suggestions.length === 0) return null;
   // `hidden` suggestions stay in the array (so the free-text fuzzy matcher can
   // still find them) but never render as a chip — `si` must stay the index
@@ -18,7 +19,7 @@ function Suggestions({ done, isLast, suggestions, onClick }) {
       {suggestions.map((s, si) =>
         s.hidden ? null : (
           <button key={si} type="button" className="suggestion-chip" onClick={() => onClick(si, s)}>
-            {s.q}
+            {t(s.q)}
           </button>
         )
       )}
@@ -26,33 +27,45 @@ function Suggestions({ done, isLast, suggestions, onClick }) {
   );
 }
 
-function QaEntry({ q, a, citation, suggestions, isLast, onSuggestionClick }) {
+// Combines a message's main text with its optional trailing nudge prompt
+// (e.g. "Yes — but are you ready to move on?") AFTER translating each piece
+// separately, since the two are stored untranslated and only concatenated
+// at display time — that's what lets a language switch retranslate history.
+function displayText(t, text, appendPrompt) {
+  return appendPrompt ? `${t(text)} ${t(appendPrompt)}` : t(text);
+}
+
+function QaEntry({ q, a, appendPrompt, citation, suggestions, isLast, onSuggestionClick }) {
+  const t = useT();
   const [done, setDone] = useState(false);
   return (
     <>
-      <div className="chat-bubble-user">{q}</div>
+      <div className="chat-bubble-user">{t(q)}</div>
       <div className="chat-bubble" style={{ marginTop: 6 }}>
-        <StreamedText text={a} after={<Citation citation={citation} />} onDone={() => setDone(true)} />
+        <StreamedText text={displayText(t, a, appendPrompt)} after={<Citation citation={citation} />} onDone={() => setDone(true)} />
       </div>
       <Suggestions done={done} isLast={isLast} suggestions={suggestions} onClick={onSuggestionClick} />
     </>
   );
 }
 
-function AssistantEntry({ text, citation, suggestions, isLast, onSuggestionClick }) {
+function AssistantEntry({ text, appendPrompt, citation, suggestions, isLast, onSuggestionClick }) {
+  const t = useT();
   const [done, setDone] = useState(false);
   return (
     <>
       <div className="chat-bubble">
-        <StreamedText text={text} after={<Citation citation={citation} />} onDone={() => setDone(true)} />
+        <StreamedText text={displayText(t, text, appendPrompt)} after={<Citation citation={citation} />} onDone={() => setDone(true)} />
       </div>
       <Suggestions done={done} isLast={isLast} suggestions={suggestions} onClick={onSuggestionClick} />
     </>
   );
 }
 
-export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask anything", onAskAnything, freeTextMode }) {
+export default function ChatPanel({ stepKey, chatLog, inputPlaceholder, onAskAnything, freeTextMode }) {
   const dispatch = useAppDispatch();
+  const t = useT();
+  const placeholder = t(inputPlaceholder || "Ask anything");
   const [text, setText] = useState("");
   const scrollRef = useRef(null);
   const spacerRef = useRef(null);
@@ -97,8 +110,8 @@ export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask an
         {chatLog.length === 0 && (
           <div className="chat-empty">
             {freeTextMode
-              ? "Tap an answer on the left, or tell Zoe about your kitchen here to skip straight ahead."
-              : "Zoe's notes for this step will appear here."}
+              ? t("Tap an answer on the left, or tell Zoe about your kitchen here to skip straight ahead.")
+              : t("Zoe's notes for this step will appear here.")}
           </div>
         )}
         {chatLog.map((msg, i) => {
@@ -108,7 +121,7 @@ export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask an
             return (
               <div className="msg-block" key={i}>
                 <div className="chat-bubble transition">
-                  <StreamedText text={msg.text} />
+                  <StreamedText text={t(msg.text)} />
                 </div>
               </div>
             );
@@ -116,21 +129,21 @@ export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask an
           if (msg.type === "user") {
             return (
               <div className="msg-block" key={i}>
-                <div className="chat-bubble-user">{msg.text}</div>
+                <div className="chat-bubble-user">{t(msg.text)}</div>
               </div>
             );
           }
           if (msg.type === "qa") {
             return (
               <div className="msg-block" key={i}>
-                <QaEntry q={msg.q} a={msg.a} citation={msg.citation} suggestions={msg.suggestions} isLast={isLast} onSuggestionClick={(si, s) => clickSuggestion(i, si, s)} />
+                <QaEntry q={msg.q} a={msg.a} appendPrompt={msg.appendPrompt} citation={msg.citation} suggestions={msg.suggestions} isLast={isLast} onSuggestionClick={(si, s) => clickSuggestion(i, si, s)} />
               </div>
             );
           }
           // fact or assistant, may carry suggestions — only the newest message still offers them, and only once fully streamed in
           return (
             <div className="msg-block" key={i}>
-              <AssistantEntry text={msg.text} citation={msg.citation} suggestions={msg.suggestions} isLast={isLast} onSuggestionClick={(si, s) => clickSuggestion(i, si, s)} />
+              <AssistantEntry text={msg.text} appendPrompt={msg.appendPrompt} citation={msg.citation} suggestions={msg.suggestions} isLast={isLast} onSuggestionClick={(si, s) => clickSuggestion(i, si, s)} />
             </div>
           );
         })}
@@ -141,7 +154,7 @@ export default function ChatPanel({ stepKey, chatLog, inputPlaceholder = "Ask an
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={inputPlaceholder}
+            placeholder={placeholder}
             onKeyDown={(e) => {
               if (e.key === "Enter") submit();
             }}

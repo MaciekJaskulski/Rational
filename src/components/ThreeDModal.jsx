@@ -1,6 +1,9 @@
+import { useT } from "../state/store";
+
 // Shared by both the desktop ProductPreview and mobile MobileProductZone —
 // one modal implementation, triggered from either tree.
 export default function ThreeDModal({ open, onClose }) {
+  const t = useT();
   if (!open) return null;
 
   return (
@@ -8,7 +11,7 @@ export default function ThreeDModal({ open, onClose }) {
       <div className="threed-card" onClick={(e) => e.stopPropagation()}>
         <div className="threed-embed-wrap">
           <iframe
-            title="Rational Combi Oven"
+            title={t("Rational Combi Oven")}
             className="threed-iframe"
             frameBorder="0"
             allowFullScreen
@@ -19,7 +22,7 @@ export default function ThreeDModal({ open, onClose }) {
           />
         </div>
         <button type="button" className="threed-close-btn" onClick={onClose}>
-          Close
+          {t("Close")}
         </button>
       </div>
     </div>

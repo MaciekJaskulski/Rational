@@ -21,11 +21,14 @@ function initialState() {
     productPreviewShown: false,
     checklistAdded: false,
     sentToAdvisor: false,
+    mobileTab: "guided", // "guided" | "chat" — which tab MobileApp shows; lifted here (not local component
+    // state) so any component (e.g. the mobile Path C demo's "Let me review my setup" action) can switch it.
     pathC: {
       active: false,
       stage: null, // 'confirm_business' | 'stepping' (walking through the real guided steps, chat-narrated)
       inference: null,
       ventilationAssumed: false,
+      ventilationUnlocked: false, // mobile-only: gates the ventilation synthetic question behind an explicit "ready?" nudge
     },
   };
 }
@@ -109,6 +112,11 @@ function nudgeForState(state) {
     return { prompt: "Do you want me to summarize your choice?", yesAction: "pathc:summarize" };
   }
   if (state.screen !== "guided") return null;
+  if (state.currentStep === 4 && state.answers.power && !state.answers.ventilation) {
+    // Still within step 4 (installation) — this isn't a step-advance, just
+    // unlocking the ventilation sub-question, which otherwise waits.
+    return { prompt: "Are you ready to move on to ventilation?", yesAction: "pathc:unlock_ventilation" };
+  }
   const prompt = NEXT_STEP_PROMPTS[state.currentStep];
   return prompt ? { prompt, yesAction: "pathc:advance" } : null;
 }
@@ -302,6 +310,12 @@ function reducer(state, action) {
     case "PATHC_ADVANCE":
       return advanceToNextStep(state);
 
+    case "PATHC_UNLOCK_VENTILATION":
+      return { ...state, pathC: { ...state.pathC, ventilationUnlocked: true } };
+
+    case "SET_MOBILE_TAB":
+      return { ...state, mobileTab: action.tab };
+
     case "SEED_REFINE": {
       if (state.chatByStep.refine && state.chatByStep.refine.length > 0) return state;
       const rec = computeRecommendation(state.answers, state.overrides);
@@ -391,12 +405,11 @@ function reducer(state, action) {
           chatByStep: pushChat(state.chatByStep, "meals", { type: "user", text }),
         };
       }
-      const answers = {
-        ...state.answers,
-        meals: inference.meals,
-        focus: inference.focus,
-        footprint: inference.footprint,
-      };
+      // Only meals is actually applied — focus/footprint stay unanswered so
+      // steps 2/3 still ask for real, explicit confirmation via the normal
+      // synthetic-question flow (their real content is what informs the
+      // inference `reason`, not a silent pre-fill).
+      const answers = { ...state.answers, meals: inference.meals };
       const mealsOpt = findOption("meals", inference.meals);
       const gridWord = mealsOpt.gridSize;
       const rec = computeRecommendation(answers);

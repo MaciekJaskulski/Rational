@@ -35,10 +35,16 @@ function useConversationBlocks() {
     } else if (step.subQuestions) {
       const powerDone = !!state.answers.power;
       const ventDone = !!state.answers.ventilation;
+      // In the Path C chat-narrated flow, the ventilation question waits
+      // behind an explicit "ready to move on to ventilation?" nudge (see
+      // nudgeForState in store.jsx) instead of appearing automatically —
+      // outside Path C (plain mobile guided-via-chat), it still shows as
+      // soon as power is answered, unchanged.
+      const ventilationGateOpen = !state.pathC.active || state.pathC.ventilationUnlocked;
       let synthetic = null;
       if (isCurrent && !powerDone) {
         synthetic = { text: "What's your power connection — electric or gas?", suggestions: step.subQuestions[0].options.map((o) => ({ q: o.label, action: `subselect:power:${o.id}` })) };
-      } else if (isCurrent && !ventDone) {
+      } else if (isCurrent && !ventDone && ventilationGateOpen) {
         synthetic = { text: "And what about ventilation — do you already have extraction, or will you need a hood?", suggestions: step.subQuestions[1].options.map((o) => ({ q: o.label, action: `subselect:ventilation:${o.id}` })) };
       }
       blocks.push({ key: step.key, entries, synthetic });
@@ -56,7 +62,7 @@ function useConversationBlocks() {
 // then (only on the last block) a synthetic question, then (once refine is
 // reached) the refine prompt/confirmation. This is what actually gets played
 // out message-by-message; see revealCount below.
-function buildQueue(blocks, sentToAdvisor) {
+function buildQueue(blocks, sentToAdvisor, pathCActive) {
   const queue = [];
   const lastBlockIdx = blocks.length - 1;
   blocks.forEach((block, bi) => {
@@ -68,7 +74,11 @@ function buildQueue(blocks, sentToAdvisor) {
       queue.push({ id: `${block.key}-synthetic`, kind: "synthetic", synthetic: block.synthetic });
     }
     if (block.isRefine && block.entries.length > 0) {
-      queue.push({ id: "refine-prompt", kind: sentToAdvisor ? "refine-sent" : "refine-prompt" });
+      // The mobile Path C demo ends with its own three CTAs instead of the
+      // generic "tweak a field" panel — plain mobile guided-via-chat (never
+      // touched Path C) keeps the original panel, unchanged.
+      const kind = sentToAdvisor ? "refine-sent" : pathCActive ? "refine-pathc-actions" : "refine-prompt";
+      queue.push({ id: "refine-prompt", kind });
     }
   });
   return queue;
@@ -78,7 +88,7 @@ function buildQueue(blocks, sentToAdvisor) {
 // panel) don't hold up the queue — they're revealed and immediately let the
 // next item start.
 function isInstantKind(item) {
-  return (item.kind === "entry" && item.entry.type === "user") || item.kind === "refine-prompt";
+  return (item.kind === "entry" && item.entry.type === "user") || item.kind === "refine-prompt" || item.kind === "refine-pathc-actions";
 }
 
 // Suggestion chips only appear once the message is 100% streamed in — `done`
@@ -159,7 +169,7 @@ export default function MobileChatTab() {
   const dispatch = useAppDispatch();
   const rec = useRecommendation();
   const blocks = useConversationBlocks();
-  const queue = buildQueue(blocks, state.sentToAdvisor);
+  const queue = buildQueue(blocks, state.sentToAdvisor, state.pathC.active);
   const [text, setText] = useState("");
   const [expandedField, setExpandedField] = useState(null);
   const [revealCount, setRevealCount] = useState(0);
@@ -218,7 +228,11 @@ export default function MobileChatTab() {
     if (kind === "select") {
       const stepId = Number(a);
       dispatch({ type: "SELECT_OPTION", stepId, optionId: b });
-      dispatch({ type: "CONTINUE" });
+      // Outside Path C, selecting immediately advances — mobile's only way
+      // to move forward without a separate Continue button. Inside Path C,
+      // the answer's factBubble + curated suggestions get a turn first;
+      // advancing instead waits for the explicit "ready to continue" nudge.
+      if (!state.pathC.active) dispatch({ type: "CONTINUE" });
       return;
     }
     if (kind === "subselect") {
@@ -344,6 +358,25 @@ export default function MobileChatTab() {
               ))}
             </div>
           )}
+        </div>
+      );
+    }
+
+    if (item.kind === "refine-pathc-actions") {
+      return (
+        <div className="m-msg-block" key={key}>
+          <div className="m-bubble">Ready to bring this all together?</div>
+          <div className="m-suggestions">
+            <button type="button" className="m-suggestion-chip m-suggestion-chip--primary" onClick={() => dispatch({ type: "SET_MOBILE_TAB", tab: "guided" })}>
+              Let me review my setup
+            </button>
+            <button type="button" className="m-suggestion-chip">
+              Save as PDF
+            </button>
+            <a className="m-suggestion-chip" href="https://www.rational-online.com/en_gb/customercare/rational-dealer/" target="_blank" rel="noreferrer">
+              Find a local dealer
+            </a>
+          </div>
         </div>
       );
     }

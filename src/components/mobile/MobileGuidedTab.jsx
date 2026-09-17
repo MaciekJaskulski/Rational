@@ -90,7 +90,7 @@ function RefineFields() {
 
   return (
     <>
-      <div className="m-step-label">REFINE &amp; ACCESSORIES</div>
+      <div className="m-step-label">REFINE</div>
       <h1 className="m-q-title">Here's the full build — tweak anything that doesn't fit</h1>
       <p className="m-q-subtitle">
         {rec.line} · {rec.gridSize}

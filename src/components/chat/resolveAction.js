@@ -8,6 +8,7 @@ export default function resolveAction(dispatch, action) {
     if (value === "upsize") dispatch({ type: "PATHC_UPSIZE" });
     if (value === "why") dispatch({ type: "PATHC_WHY" });
     if (value === "advance") dispatch({ type: "PATHC_ADVANCE" });
+    if (value === "unlock_ventilation") dispatch({ type: "PATHC_UNLOCK_VENTILATION" });
     if (value === "summarize") dispatch({ type: "GO_SUMMARY" });
     return true;
   }

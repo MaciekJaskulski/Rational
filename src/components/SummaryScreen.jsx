@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useAppState, useAppDispatch, useRecommendation } from "../state/store";
 import ProductPreview from "./ProductPreview";
+import LeadGenModal from "./LeadGenModal";
 
 const DEALER_LOCATOR_URL = "https://www.rational-online.com/en_gb/customercare/rational-dealer/?zipKey=London%2C+UK";
 
@@ -7,6 +9,7 @@ export default function SummaryScreen() {
   const state = useAppState();
   const dispatch = useAppDispatch();
   const rec = useRecommendation();
+  const [showLeadGen, setShowLeadGen] = useState(false);
 
   const powerLabel = state.answers.power === "gas" ? "gas" : state.answers.power === "electric" ? "electric" : "power TBD";
 
@@ -39,10 +42,10 @@ export default function SummaryScreen() {
           <button className="btn btn-back" type="button">
             Save as PDF
           </button>
-          <button className="btn btn-back" type="button">
-            Email it
+          <button className="btn btn-primary" type="button" onClick={() => setShowLeadGen(true)}>
+            Submit to sales
           </button>
-          <a className="btn btn-primary" href={DEALER_LOCATOR_URL} target="_blank" rel="noreferrer">
+          <a className="btn btn-back" href={DEALER_LOCATOR_URL} target="_blank" rel="noreferrer">
             Find your local dealer
           </a>
         </div>
@@ -51,6 +54,7 @@ export default function SummaryScreen() {
           Back to Refine
         </button>
       </div>
+      <LeadGenModal open={showLeadGen} onClose={() => setShowLeadGen(false)} />
     </div>
   );
 }

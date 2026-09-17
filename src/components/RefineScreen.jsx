@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppState, useAppDispatch, useRecommendation } from "../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../data/engine";
 import ChatPanel from "./ChatPanel";
+import LeadGenModal from "./LeadGenModal";
 
 const DEALER_LOCATOR_URL = "https://www.rational-online.com/en_gb/customercare/rational-dealer/?zipKey=London%2C+UK";
 
@@ -10,6 +11,7 @@ export default function RefineScreen() {
   const dispatch = useAppDispatch();
   const rec = useRecommendation();
   const chatLog = state.chatByStep.refine || [];
+  const [showLeadGen, setShowLeadGen] = useState(false);
 
   useEffect(() => {
     dispatch({ type: "SEED_REFINE" });
@@ -87,10 +89,10 @@ export default function RefineScreen() {
             <button className="btn btn-back" type="button">
               Save as PDF
             </button>
-            <button className="btn btn-back" type="button">
-              Email it
+            <button className="btn btn-primary" type="button" onClick={() => setShowLeadGen(true)}>
+              Submit to sales
             </button>
-            <a className="btn btn-primary" href={DEALER_LOCATOR_URL} target="_blank" rel="noreferrer">
+            <a className="btn btn-back" href={DEALER_LOCATOR_URL} target="_blank" rel="noreferrer">
               Find your local dealer
             </a>
           </div>
@@ -98,6 +100,7 @@ export default function RefineScreen() {
 
         <ChatPanel stepKey="refine" chatLog={chatLog} onAskAnything={askAnything} />
       </div>
+      <LeadGenModal open={showLeadGen} onClose={() => setShowLeadGen(false)} />
     </div>
   );
 }

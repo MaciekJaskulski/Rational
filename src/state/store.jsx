@@ -456,7 +456,7 @@ function reducer(state, action) {
     }
 
     case "PATHC_UPSIZE": {
-      const answers = { ...state.answers, meals: "80_150" };
+      const answers = { ...state.answers, meals: "10-1" };
       const rec = computeRecommendation(answers);
       const chatByStep = pushChat(state.chatByStep, "meals", {
         type: "assistant",

@@ -69,7 +69,7 @@ export function computeStand(answers, gridSizeOverride) {
 }
 
 export function gridSizeOptions() {
-  return ["6-Grid", "10-Grid", "20-Grid"];
+  return ["XS", "6-Grid (1/1 GN)", "6-Grid (2/1 GN)", "10-Grid (1/1 GN)", "10-Grid (2/1 GN)", "20-Grid (1/1 GN)", "20-Grid (2/1 GN)"];
 }
 
 export function standOptions() {

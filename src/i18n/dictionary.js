@@ -26,62 +26,81 @@ export const DE = {
   "Hi, I'm Zoe — I'll help you find the right RATIONAL combi oven for your kitchen. You can click through the questions on the left, or just tell me about your kitchen here and I'll get you started. Either way, I'll explain the 'why' behind every recommendation, and you can ask me anything along the way — specs, installation, warranty, whatever you need.":
     "Hallo, ich bin Zoe — ich helfe Ihnen, den richtigen RATIONAL Combi-Dämpfer für Ihre Küche zu finden. Sie können sich links durch die Fragen klicken oder mir hier einfach von Ihrer Küche erzählen, dann lege ich direkt los. So oder so erkläre ich Ihnen immer das „Warum“ hinter jeder Empfehlung, und Sie können mich jederzeit alles fragen — Spezifikationen, Installation, Garantie, was auch immer Sie brauchen.",
 
-  "Up to 30 meals": "Bis zu 30 Mahlzeiten",
-  "Small kitchen, low volume": "Kleine Küche, geringes Volumen",
-  "The 6-Grid is RATIONAL's smallest unit in this line: 33½\"W × 33⅛\"D × 31⅝\"H, about 218 lb, running on 10.8 kW. It holds six 1/1 GN pans — the whole cabinet fits on a standard countertop run. The cabinet and capacity are identical whether you end up on Classic or Pro; Pro just adds the touchscreen and automated cooking assistant on top.":
-    "Das 6-Grid ist das kleinste Gerät von RATIONAL in dieser Baureihe: 33½″ B × 33⅛″ T × 31⅝″ H, etwa 218 lb (99 kg), mit 10,8 kW Leistung. Es fasst sechs 1/1 GN-Behälter — das gesamte Gehäuse passt auf eine normale Arbeitsplatte. Gehäuse und Kapazität sind bei Classic und Pro identisch; Pro ergänzt lediglich den Touchscreen und den automatisierten Kochassistenten.",
-  "How much space does a 6-Grid need?": "Wie viel Platz benötigt ein 6-Grid?",
-  "It's the most compact size in the line — fits comfortably on a standard countertop run.":
-    "Es ist die kompakteste Größe der Baureihe — passt problemlos auf eine normale Arbeitsplatte.",
-  "Will I outgrow this fast?": "Wachse ich daraus schnell heraus?",
-  "Most small kitchens run a 6-Grid for years — it's sized for steady low volume, not just a starting point.":
-    "Die meisten kleinen Küchen nutzen ein 6-Grid jahrelang — es ist für gleichbleibend geringes Volumen ausgelegt, nicht nur als Einstiegsgröße gedacht.",
-  "What's the price difference vs. a bigger unit?": "Wie groß ist der Preisunterschied zu einem größeren Gerät?",
-  "Smaller grids cost meaningfully less up front and use less energy per idle hour — worth it if your volume is genuinely steady.":
-    "Kleinere Geräte kosten in der Anschaffung deutlich weniger und verbrauchen im Leerlauf weniger Energie — lohnt sich, wenn Ihr Volumen wirklich konstant ist.",
+  "20–80 meals": "20–80 Mahlzeiten",
+  "Very tight kitchen, compact batches": "Sehr beengte Küche, kompakte Chargen",
+  "The iCombi Pro XS is RATIONAL's smallest combi oven, full stop: about 25¾\"W × 24½\"D × 23⅜\"H, around 147 lb, running on just 5.7 kW. It holds six 2/3 GN pans and is electric-only — there's no gas version. It's built for kitchens that genuinely don't have room for a full-size unit, not as a cut-down version of the bigger ones.":
+    "Der iCombi Pro XS ist RATIONALs kleinster Combi-Dämpfer, ganz einfach: etwa 25¾″ B × 24½″ T × 23⅜″ H, rund 147 lb (67 kg), mit nur 5,7 kW Leistung. Er fasst sechs 2/3-GN-Behälter und ist ausschließlich elektrisch — es gibt keine Gasversion. Er ist für Küchen gebaut, die wirklich keinen Platz für ein vollwertiges Gerät haben, nicht als abgespeckte Version der größeren Modelle.",
+  "Why electric only?": "Warum nur elektrisch?",
+  "There's no gas version of the XS — its small footprint and low power draw are built around the electric-only spec, so gas isn't offered at this size.":
+    "Es gibt keine Gasversion des XS — seine geringe Stellfläche und der niedrige Leistungsbedarf sind auf die rein elektrische Ausführung ausgelegt, daher wird Gas bei dieser Größe nicht angeboten.",
+  "What actually fits in it?": "Was passt tatsächlich hinein?",
+  "Six 2/3 GN pans — smaller than the 1/1 GN pans the rest of the line uses, so check your existing pans fit before committing to this size.":
+    "Sechs 2/3-GN-Behälter — kleiner als die 1/1-GN-Behälter, die der Rest der Baureihe verwendet. Prüfen Sie also, ob Ihre vorhandenen Behälter passen, bevor Sie sich für diese Größe entscheiden.",
 
-  "30–80 meals": "30–80 Mahlzeiten",
-  "Standard à la carte service": "Standard À-la-carte-Service",
-  "The 10-Grid measures 33½\"W × 33⅛\"D × 41⅞\"H, weighs about 287 lb, and runs on 18.9 kW — holding ten 1/1 GN pans. It's the same footprint as the 6-Grid, just taller, so it's still a straightforward swap-in if you're sizing up later. Cabinet and capacity are identical between Classic and Pro at this size; the difference is entirely in the controls.":
-    "Das 10-Grid misst 33½″ B × 33⅛″ T × 41⅞″ H, wiegt etwa 287 lb (130 kg) und läuft mit 18,9 kW — es fasst zehn 1/1 GN-Behälter. Die Stellfläche ist identisch mit dem 6-Grid, nur höher — ein späteres Upsizing ist also problemlos möglich. Gehäuse und Kapazität sind bei Classic und Pro bei dieser Größe identisch; der Unterschied liegt allein in der Steuerung.",
-  "What if I grow beyond this?": "Was, wenn ich darüber hinauswachse?",
-  "A 10-Grid can run two overlapping services a day if needed, and the 20-Grid uses the same control logic, so retraining is minimal.":
-    "Ein 10-Grid kann bei Bedarf zwei überlappende Services pro Tag bewältigen, und das 20-Grid nutzt die gleiche Bedienlogik — der Schulungsaufwand bleibt also minimal.",
-  "Is 10-Grid enough for a lunch rush?": "Reicht ein 10-Grid für den Mittagsansturm?",
-  "Yes for most à la carte lunch volumes — it's the same size recommended for standard service, not just steady-state days.":
-    "Ja, für die meisten À-la-carte-Mittagsvolumen — diese Größe wird für den Standardbetrieb empfohlen, nicht nur für ruhigere Tage.",
-  "Can I run breakfast and dinner on one 10-Grid?": "Kann ich Frühstück und Abendessen auf einem 10-Grid fahren?",
-  "Yes — most operators run multiple dayparts on one unit, cleaning between services rather than needing separate ovens.":
-    "Ja — die meisten Betriebe fahren mehrere Tageszeiten auf einem Gerät und reinigen zwischen den Services, anstatt separate Öfen zu benötigen.",
+  "30–100 meals": "30–100 Mahlzeiten",
+  "Small kitchen, standard-size pans": "Kleine Küche, Standardgröße Behälter",
+  "The 6-Grid 1/1 GN is RATIONAL's smallest standard-pan unit: 33½\"W × 33⅛\"D × 31⅝\"H, about 218 lb, running on 10.8 kW. It holds six 1/1 GN pans — the whole cabinet fits on a standard countertop run. The cabinet and capacity are identical whether you end up on Classic or Pro; Pro just adds the touchscreen and automated cooking assistant on top.":
+    "Das 6-Grid 1/1 GN ist RATIONALs kleinstes Gerät mit Standardbehältern: 33½″ B × 33⅛″ T × 31⅝″ H, etwa 218 lb (99 kg), mit 10,8 kW Leistung. Es fasst sechs 1/1-GN-Behälter — das gesamte Gehäuse passt auf eine normale Arbeitsplatte. Gehäuse und Kapazität sind bei Classic und Pro identisch; Pro ergänzt lediglich den Touchscreen und den automatisierten Kochassistenten.",
+  "How much space does this need?": "Wie viel Platz benötigt dieses Gerät?",
+  "It's the most compact standard-pan size in the line — fits comfortably on a standard countertop run.":
+    "Es ist die kompakteste Standardbehälter-Größe der Baureihe — passt problemlos auf eine normale Arbeitsplatte.",
+  "Will I outgrow this fast?": "Wachse ich daraus schnell heraus?",
+  "Most small kitchens run this size for years — it's sized for steady low volume, not just a starting point.":
+    "Die meisten kleinen Küchen nutzen diese Größe jahrelang — sie ist für gleichbleibend geringes Volumen ausgelegt, nicht nur als Einstiegsgröße gedacht.",
+
+  "60–160 meals": "60–160 Mahlzeiten",
+  "Small kitchen, bigger batches": "Kleine Küche, größere Chargen",
+  "Same 6-pan cabinet family, but built around the wider 2/1 GN pan (roughly double a 1/1 GN pan): 42¼\"W × 38⅜\"D × 29⅝\"H, about 298 lb, running on 22.4 kW. It's a meaningfully bigger, heavier unit than the 1/1 GN version — worth it if your batches genuinely need the larger pan, not just more of them.":
+    "Gleiche 6-Behälter-Gerätefamilie, aber um den breiteren 2/1-GN-Behälter herum gebaut (etwa doppelt so groß wie ein 1/1-GN-Behälter): 42¼″ B × 38⅜″ T × 29⅝″ H, etwa 298 lb (135 kg), mit 22,4 kW Leistung. Es ist ein spürbar größeres, schwereres Gerät als die 1/1-GN-Version — lohnt sich, wenn Ihre Chargen wirklich den größeren Behälter brauchen, nicht nur mehr davon.",
+  "What's actually different from the 1/1 GN version?": "Was ist tatsächlich anders als bei der 1/1-GN-Version?",
+  "The pan itself — 2/1 GN is roughly double the surface area of 1/1 GN, so the same six-pan count holds a lot more per load, at the cost of a larger, heavier cabinet.":
+    "Der Behälter selbst — 2/1 GN hat etwa die doppelte Fläche von 1/1 GN, sodass dieselbe Anzahl von sechs Behältern deutlich mehr pro Charge fasst, allerdings bei einem größeren, schwereren Gehäuse.",
+  "Do I need the bigger pan format?": "Brauche ich das größere Behälterformat?",
+  "Only if your batches are genuinely bigger than a 1/1 GN pan comfortably holds — otherwise the 1/1 GN version covers the same meal count in a smaller footprint.":
+    "Nur wenn Ihre Chargen wirklich größer sind, als ein 1/1-GN-Behälter bequem fasst — andernfalls deckt die 1/1-GN-Version dieselbe Mahlzeitenzahl auf kleinerer Stellfläche ab.",
 
   "80–150 meals": "80–150 Mahlzeiten",
-  "Busy kitchen, high turnover": "Stark frequentierte Küche, hoher Durchsatz",
-  "The 20-Grid is 34½\"W × 35⅞\"D × 73¾\"H, around 560 lb, and pulls 37.2 kW — holding twenty 1/1 GN pans on a mobile rack. It's a floor-standing unit only (no countertop mount at this size). Cabinet and capacity are the same between Classic and Pro; Pro's touchscreen and automated cooking assistant are what change.":
-    "Das 20-Grid ist 34½″ B × 35⅞″ T × 73¾″ H, etwa 560 lb (254 kg) schwer und benötigt 37,2 kW — es fasst zwanzig 1/1 GN-Behälter auf einem fahrbaren Rack. Es ist ausschließlich als Standgerät erhältlich (bei dieser Größe gibt es keine Aufstellung auf der Arbeitsplatte). Gehäuse und Kapazität sind bei Classic und Pro gleich; der Unterschied liegt im Touchscreen und im automatisierten Kochassistenten von Pro.",
+  "Growing kitchen, standard-size pans": "Wachsende Küche, Standardgröße Behälter",
+  "The 10-Grid 1/1 GN measures 33½\"W × 33⅛\"D × 41⅞\"H, weighs about 287 lb, and runs on 18.9 kW — holding ten 1/1 GN pans. It's the same footprint as the 6-Grid 1/1 GN, just taller, so it's still a straightforward swap-in if you're sizing up later. Cabinet and capacity are identical between Classic and Pro at this size; the difference is entirely in the controls.":
+    "Das 10-Grid 1/1 GN misst 33½″ B × 33⅛″ T × 41⅞″ H, wiegt etwa 287 lb (130 kg) und läuft mit 18,9 kW — es fasst zehn 1/1-GN-Behälter. Die Stellfläche ist identisch mit dem 6-Grid 1/1 GN, nur höher — ein späteres Upsizing ist also problemlos möglich. Gehäuse und Kapazität sind bei Classic und Pro bei dieser Größe identisch; der Unterschied liegt allein in der Steuerung.",
+  "What if I grow beyond this?": "Was, wenn ich darüber hinauswachse?",
+  "This can run two overlapping services a day if needed, and the 20-Grid family uses the same control logic, so retraining is minimal.":
+    "Dieses Gerät kann bei Bedarf zwei überlappende Services pro Tag bewältigen, und die 20-Grid-Familie nutzt die gleiche Bedienlogik — der Schulungsaufwand bleibt also minimal.",
+  "Is this enough for a lunch rush?": "Reicht das für den Mittagsansturm?",
+  "Yes for most à la carte lunch volumes — it's the same size recommended for standard service, not just steady-state days.":
+    "Ja, für die meisten À-la-carte-Mittagsvolumen — diese Größe wird für den Standardbetrieb empfohlen, nicht nur für ruhigere Tage.",
+
+  "150–300 meals": "150–300 Mahlzeiten",
+  "Growing kitchen, bigger batches": "Wachsende Küche, größere Chargen",
+  "Same 10-pan cabinet family, built around the wider 2/1 GN pan: 42¼\"W × 38⅜\"D × 41⅞\"H, about 381 lb, running on 37.4 kW. It effectively doubles per-load capacity over the 1/1 GN version — some operators run this as 10× 2/1 GN, others load it as 20× 1/1 GN instead.":
+    "Gleiche 10-Behälter-Gerätefamilie, um den breiteren 2/1-GN-Behälter herum gebaut: 42¼″ B × 38⅜″ T × 41⅞″ H, etwa 381 lb (173 kg), mit 37,4 kW Leistung. Es verdoppelt effektiv die Kapazität pro Charge gegenüber der 1/1-GN-Version — manche Betriebe fahren es mit 10× 2/1 GN, andere beladen es stattdessen mit 20× 1/1 GN.",
+  "Can I use 1/1 GN pans in this one too?": "Kann ich hier auch 1/1-GN-Behälter verwenden?",
+  "Yes — it's rated for either ten 2/1 GN pans or twenty 1/1 GN pans, so it flexes to whichever pan format your kitchen already uses.":
+    "Ja — es ist für zehn 2/1-GN-Behälter oder zwanzig 1/1-GN-Behälter ausgelegt und passt sich so an das Behälterformat an, das Ihre Küche bereits verwendet.",
+  "How does this compare to a 20-Grid?": "Wie schneidet das im Vergleich zu einem 20-Grid ab?",
+  "Meal range overlaps with the 20-Grid 1/1 GN — this one gets there through wider pans instead of more of them, so it's a shorter, wider cabinet rather than a taller one.":
+    "Der Mahlzeitenbereich überschneidet sich mit dem 20-Grid 1/1 GN — dieses Gerät erreicht das über breitere statt mehr Behälter, also ein kürzeres, breiteres statt ein höheres Gehäuse.",
+
+  "Busy kitchen, standard-size pans, high turnover": "Stark frequentierte Küche, Standardgröße Behälter, hoher Durchsatz",
+  "The 20-Grid 1/1 GN is 34½\"W × 35⅞\"D × 73¾\"H, around 560 lb, and pulls 37.2 kW — holding twenty 1/1 GN pans on a mobile rack. It's a floor-standing unit only (no countertop mount at this size). Cabinet and capacity are the same between Classic and Pro; Pro's touchscreen and automated cooking assistant are what change.":
+    "Das 20-Grid 1/1 GN ist 34½″ B × 35⅞″ T × 73¾″ H, etwa 560 lb (254 kg) schwer und benötigt 37,2 kW — es fasst zwanzig 1/1-GN-Behälter auf einem fahrbaren Rack. Es ist ausschließlich als Standgerät erhältlich (bei dieser Größe gibt es keine Aufstellung auf der Arbeitsplatte). Gehäuse und Kapazität sind bei Classic und Pro gleich; der Unterschied liegt im Touchscreen und im automatisierten Kochassistenten von Pro.",
   "Is that overkill on quieter days?": "Ist das an ruhigeren Tagen übertrieben?",
-  "No — a 20-Grid runs efficiently at partial load too, so quieter days just mean it's not running at capacity, not wasted.":
-    "Nein — ein 20-Grid arbeitet auch bei Teilbeladung effizient, an ruhigeren Tagen läuft es einfach nicht mit voller Kapazität, ohne dass etwas verschwendet wird.",
-  "Does a bigger oven cost more to run?": "Kostet ein größeres Gerät mehr im Betrieb?",
-  "Energy use scales roughly with how full each batch is, not the cabinet size itself, so it doesn't cost much more than a smaller unit run at capacity.":
-    "Der Energieverbrauch richtet sich in etwa nach der Beladung je Charge, nicht nach der Gerätegröße selbst — es kostet also kaum mehr als ein kleineres, voll ausgelastetes Gerät.",
+  "No — this runs efficiently at partial load too, so quieter days just mean it's not running at capacity, not wasted.":
+    "Nein — auch dieses Gerät arbeitet bei Teilbeladung effizient, an ruhigeren Tagen läuft es einfach nicht mit voller Kapazität, ohne dass etwas verschwendet wird.",
   "Why Pro instead of Classic at this volume?": "Warum Pro statt Classic bei diesem Volumen?",
   "At this turnover, Pro's sensor-adjusted cooking and automated cleaning start paying for themselves in consistency and staff time.":
     "Bei diesem Durchsatz zahlen sich Pros sensorgesteuertes Garen und die automatische Reinigung in Konsistenz und Personalzeit aus.",
 
-  "150+ meals": "150+ Mahlzeiten",
-  "Large-scale or multi-unit operation": "Großbetrieb oder Mehrgeräte-Betrieb",
-  "consider a second unit or a multi-unit service line": "eine zweite Einheit oder eine Mehrgeräte-Servicelinie in Betracht ziehen",
-  "The 20-Grid is 34½\"W × 35⅞\"D × 73¾\"H, around 560 lb, and pulls 37.2 kW — holding twenty 1/1 GN pans on a mobile rack, floor-standing only. At this volume most operators either run one near capacity or add a second unit as backup; either way, cabinet and capacity are identical between Classic and Pro at this size.":
-    "Das 20-Grid ist 34½″ B × 35⅞″ T × 73¾″ H, etwa 560 lb (254 kg) schwer und benötigt 37,2 kW — es fasst zwanzig 1/1 GN-Behälter auf einem fahrbaren Rack, ausschließlich als Standgerät. Bei diesem Volumen fahren die meisten Betriebe entweder ein Gerät nahe der Kapazitätsgrenze oder ergänzen ein zweites als Backup; in beiden Fällen sind Gehäuse und Kapazität bei Classic und Pro bei dieser Größe identisch.",
-  "Why would I want two units instead of one bigger one?": "Warum sollte ich zwei Geräte statt eines größeren wollen?",
-  "20-Grid is currently the largest single-cabinet size in this line — a second unit also gives you a backup if one goes down for cleaning or service.":
-    "Das 20-Grid ist derzeit die größte Einzelgerät-Größe dieser Baureihe — ein zweites Gerät dient zugleich als Backup, falls eines zur Reinigung oder Wartung ausfällt.",
-  "Can two ovens share the same control settings?": "Können sich zwei Geräte dieselben Steuerungseinstellungen teilen?",
-  "Yes — programs and settings carry over across units in the same line, so staff don't need to relearn anything.":
-    "Ja — Programme und Einstellungen lassen sich zwischen Geräten derselben Baureihe übertragen, das Personal muss also nichts neu lernen.",
-  "What does a multi-unit installation change?": "Was ändert sich bei einer Installation mit mehreren Geräten?",
-  "Mainly utility sizing (power/gas capacity) and floor plan — otherwise each unit installs the same way as a single one.":
-    "Hauptsächlich die Dimensionierung der Anschlüsse (Strom-/Gaskapazität) und der Grundriss — ansonsten wird jedes Gerät genauso installiert wie ein einzelnes.",
+  "300–500 meals": "300–500 Mahlzeiten",
+  "Large-scale operation, bigger batches": "Großbetrieb, größere Chargen",
+  "The top of the line: same 20-pan cabinet family, built around the wider 2/1 GN pan — 42⅝\"W × 41⅜\"D × 71⅛\"H, about 717 lb, running on 67.9 kW. Floor-standing only, same as the 1/1 GN version. This is the highest single-cabinet capacity in the range before you're into multi-unit territory.":
+    "Die Spitze der Baureihe: gleiche 20-Behälter-Gerätefamilie, um den breiteren 2/1-GN-Behälter herum gebaut — 42⅝″ B × 41⅜″ T × 71⅛″ H, etwa 717 lb (325 kg), mit 67,9 kW Leistung. Ausschließlich als Standgerät, genau wie die 1/1-GN-Version. Das ist die höchste Einzelgerät-Kapazität der Baureihe, bevor es in Richtung Mehrgeräte-Betrieb geht.",
+  "What comes after this if I outgrow it?": "Was kommt danach, wenn ich daraus herauswachse?",
+  "This is the largest single cabinet in the line — beyond this, operators add a second unit rather than a bigger single oven.":
+    "Das ist das größte Einzelgerät der Baureihe — darüber hinaus ergänzen Betriebe ein zweites Gerät, statt einen noch größeren Einzelofen zu wählen.",
+  "Does this need a heavier-duty power connection?": "Braucht das einen stärkeren Stromanschluss?",
+  "Yes — 67.9 kW electric is a serious connected load, so factor that into your installer conversation early.":
+    "Ja — 67,9 kW elektrisch ist eine erhebliche Anschlussleistung, das sollten Sie frühzeitig mit Ihrem Installateur besprechen.",
 
   // ---- Step 2 — Culinary Focus ----
   "STEP 2 OF 6 — CULINARY FOCUS": "SCHRITT 2 VON 6 — KULINARISCHER SCHWERPUNKT",

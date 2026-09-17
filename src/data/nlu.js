@@ -2,7 +2,7 @@
 export const INFERENCE_CHEATSHEET = [
   {
     cues: ["steakhouse", "steak house", "steakhaus"],
-    meals: "up_to_30",
+    meals: "6-1",
     focus: "ala_carte",
     footprint: "compact",
     confidence: "Low–medium",
@@ -12,7 +12,7 @@ export const INFERENCE_CHEATSHEET = [
   },
   {
     cues: ["food truck", "imbisswagen"],
-    meals: "up_to_30",
+    meals: "xs",
     focus: "ala_carte",
     footprint: "compact",
     confidence: "Medium",
@@ -21,7 +21,7 @@ export const INFERENCE_CHEATSHEET = [
   },
   {
     cues: ["bakery", "pastry shop", "patisserie", "bäckerei", "backerei", "konditorei"],
-    meals: "30_80",
+    meals: "10-1",
     focus: "baking",
     footprint: "standard",
     confidence: "Medium",
@@ -30,7 +30,7 @@ export const INFERENCE_CHEATSHEET = [
   },
   {
     cues: ["banquet hall", "catering company", "catering", "banquet", "bankett", "cateringunternehmen"],
-    meals: "80_150",
+    meals: "10-2",
     focus: "banqueting",
     footprint: "generous",
     confidence: "Medium",
@@ -39,7 +39,7 @@ export const INFERENCE_CHEATSHEET = [
   },
   {
     cues: ["hotel restaurant", "full-service restaurant", "hotel", "hotelrestaurant"],
-    meals: "30_80",
+    meals: "10-1",
     focus: "mixed",
     footprint: "standard",
     confidence: "Low",
@@ -48,7 +48,7 @@ export const INFERENCE_CHEATSHEET = [
   },
   {
     cues: ["busy diner", "quick-service chain", "diner", "qsr", "schnellrestaurant", "imbiss"],
-    meals: "80_150",
+    meals: "20-1",
     focus: "ala_carte",
     footprint: "standard",
     confidence: "Medium",

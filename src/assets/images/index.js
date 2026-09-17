@@ -1,15 +1,26 @@
 import demoCanvas from "./bg/demo-canvas3.png";
-import icombiPro6 from "./products/icombi-pro-6-1.png";
-import icombiPro10 from "./products/icombi-pro-10-1.png";
-import icombiPro20 from "./products/icombi-pro-20-1.png";
+import icombiPro61 from "./products/icombi-pro-6-1.png";
+import icombiPro62 from "./products/icombi-pro-6-2.png";
+import icombiPro101 from "./products/icombi-pro-10-1.png";
+import icombiPro102 from "./products/icombi-pro-10-2.png";
+import icombiPro201 from "./products/icombi-pro-20-1.png";
+import icombiPro202 from "./products/icombi-pro-20-2.png";
 import icombiProXs from "./products/icombi-pro-xs.png";
 
 export const BG_CANVAS = demoCanvas;
 
+// Keyed by the exact gridSize value each Step 1 (Meals & Volume) option
+// carries — see src/data/steps.js. "-1"/"-2" in the source filenames are the
+// two real GN pan formats (1/1 = half-size, 2/1 = full-size), not two photos
+// of the same unit.
 export const PRODUCT_IMAGES = {
-  "6-Grid": icombiPro6,
-  "10-Grid": icombiPro10,
-  "20-Grid": icombiPro20,
+  XS: icombiProXs,
+  "6-Grid (1/1 GN)": icombiPro61,
+  "6-Grid (2/1 GN)": icombiPro62,
+  "10-Grid (1/1 GN)": icombiPro101,
+  "10-Grid (2/1 GN)": icombiPro102,
+  "20-Grid (1/1 GN)": icombiPro201,
+  "20-Grid (2/1 GN)": icombiPro202,
 };
 
 export const PRODUCT_IMAGE_FALLBACK = icombiProXs;

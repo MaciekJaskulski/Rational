@@ -2,6 +2,15 @@ import { STEPS } from "../data/steps";
 import { useAppState, useAppDispatch } from "../state/store";
 import ChatPanel from "./ChatPanel";
 
+function canContinue(state) {
+  const step = state.currentStep;
+  if (step === 1) return !!state.answers.meals;
+  if (step === 2) return !!state.answers.focus;
+  if (step === 3) return !!state.answers.footprint;
+  if (step === 4) return !!state.answers.power && !!state.answers.ventilation;
+  return true;
+}
+
 export default function QuestionPanel() {
   const state = useAppState();
   const dispatch = useAppDispatch();
@@ -10,9 +19,19 @@ export default function QuestionPanel() {
   const chatLog = state.chatByStep[stepKey] || [];
 
   const freeTextMode = stepKey === "meals" && !state.answers.meals && !state.pathC.active;
+  const isFirstStep = state.currentStep === 1 && !state.pathC.active;
+  const continueEnabled = canContinue(state);
 
   function askAnything(text) {
     dispatch({ type: "ASK_ANYTHING", stepKey, text });
+  }
+
+  function handleContinue() {
+    if (state.currentStep === 4) {
+      dispatch({ type: "GO_REFINE" });
+    } else {
+      dispatch({ type: "CONTINUE" });
+    }
   }
 
   return (
@@ -72,6 +91,17 @@ export default function QuestionPanel() {
               ))}
             </div>
           )}
+
+          <div className="step-nav">
+            {!isFirstStep && (
+              <button className="btn btn-back" type="button" onClick={() => dispatch({ type: "BACK" })}>
+                Back
+              </button>
+            )}
+            <button className="btn btn-primary" type="button" onClick={handleContinue} disabled={!continueEnabled}>
+              Continue →
+            </button>
+          </div>
         </div>
 
         <ChatPanel stepKey={stepKey} chatLog={chatLog} onAskAnything={askAnything} freeTextMode={freeTextMode} />

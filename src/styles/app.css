@@ -742,12 +742,6 @@ button {
   color: #fff;
 }
 
-.bottom-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
 .btn {
   border-radius: var(--radius-pill);
   font-size: 13px;
@@ -880,14 +874,14 @@ button {
   color: var(--color-text-muted-75);
 }
 
-.refine-nav {
+.step-nav {
   display: flex;
   gap: 12px;
   margin-top: 8px;
   padding-top: 16px;
   border-top: 1px solid var(--glass-panel-border);
 }
-.refine-nav .btn {
+.step-nav .btn {
   flex: 1;
   padding: 14px;
   font-size: 14px;

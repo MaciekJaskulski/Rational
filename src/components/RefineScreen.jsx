@@ -83,7 +83,7 @@ export default function RefineScreen() {
             </div>
           </div>
 
-          <div className="refine-nav">
+          <div className="step-nav">
             <button className="btn btn-back" type="button" onClick={() => dispatch({ type: "BACK" })}>
               Back
             </button>

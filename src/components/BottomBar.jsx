@@ -38,9 +38,7 @@ export default function BottomBar() {
 
   function handleContinue() {
     if (state.screen === "guided") {
-      if (state.pathC.active && state.pathC.stage === "done" && state.currentStep === 1) {
-        dispatch({ type: "PATHC_FINISH", target: "refine" });
-      } else if (state.currentStep === 4) {
+      if (state.currentStep === 4) {
         dispatch({ type: "GO_REFINE" });
       } else {
         dispatch({ type: "CONTINUE" });

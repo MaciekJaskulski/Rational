@@ -1,17 +1,12 @@
 import { useAppState, useAppDispatch, useRecommendation } from "../state/store";
 import ProductPreview from "./ProductPreview";
 
+const DEALER_LOCATOR_URL = "https://www.rational-online.com/en_gb/customercare/rational-dealer/?zipKey=London%2C+UK";
+
 export default function SummaryScreen() {
   const state = useAppState();
   const dispatch = useAppDispatch();
   const rec = useRecommendation();
-
-  const needsTrade = state.answers.power === "gas" || (rec.hood && rec.hood !== "None");
-  const tradeThing = state.answers.power === "gas" && rec.hood && rec.hood !== "None"
-    ? "gas and your extraction hood"
-    : state.answers.power === "gas"
-    ? "gas"
-    : "your extraction hood";
 
   const powerLabel = state.answers.power === "gas" ? "gas" : state.answers.power === "electric" ? "electric" : "power TBD";
 
@@ -36,38 +31,24 @@ export default function SummaryScreen() {
           ))}
         </div>
 
-        {!state.sentToAdvisor ? (
-          <>
-            <p className="q-subtitle" style={{ textAlign: "center" }}>
-              Your config: {rec.line}, {rec.gridSize}, {powerLabel}, {rec.hood === "None" ? "no hood needed" : rec.hood}, {rec.stand}, {rec.rack}. Want this sent to a Rational advisor for a formal quote?
-            </p>
+        <p className="q-subtitle" style={{ textAlign: "center" }}>
+          Your config: {rec.line}, {rec.gridSize}, {powerLabel}, {rec.hood === "None" ? "no hood needed" : rec.hood || "hood TBD"}, {rec.stand}, {rec.rack}.
+        </p>
 
-            {needsTrade && !state.checklistAdded && (
-              <p className="q-subtitle" style={{ textAlign: "center" }}>
-                Since {tradeThing} need{tradeThing.includes(" and ") ? "" : "s"} a certified installer, want me to attach an installation-readiness checklist alongside your quote?
-              </p>
-            )}
-
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-              {needsTrade && !state.checklistAdded && (
-                <button className="btn btn-back" onClick={() => dispatch({ type: "ADD_CHECKLIST" })}>
-                  Yes, add checklist
-                </button>
-              )}
-              <button className="btn btn-primary" onClick={() => dispatch({ type: "SEND_TO_ADVISOR" })}>
-                Send to advisor
-              </button>
-            </div>
-          </>
-        ) : (
-          <p className="q-subtitle" style={{ textAlign: "center" }}>
-            A Rational advisor gets your exact configuration and reaches out to confirm pricing, lead time, and installation logistics — nothing is ordered automatically.
-            {state.checklistAdded ? " Installation-readiness checklist attached." : ""}
-          </p>
-        )}
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+          <button className="btn btn-back" type="button">
+            Save as PDF
+          </button>
+          <button className="btn btn-back" type="button">
+            Email it
+          </button>
+          <a className="btn btn-primary" href={DEALER_LOCATOR_URL} target="_blank" rel="noreferrer">
+            Find your local dealer
+          </a>
+        </div>
 
         <button className="btn btn-back" style={{ marginTop: 8 }} onClick={() => dispatch({ type: "BACK" })}>
-          Back to Refine &amp; Accessories
+          Back to Refine
         </button>
       </div>
     </div>

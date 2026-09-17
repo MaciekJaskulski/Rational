@@ -30,14 +30,7 @@ function useConversationBlocks() {
 
     if (step.options) {
       const answered = !!state.answers[step.key];
-      let synthetic = null;
-      if (isCurrent && !answered) {
-        synthetic = { text: step.title, suggestions: step.options.map((o) => ({ q: o.label, action: `select:${step.id}:${o.id}` })) };
-      } else if (isCurrent && answered && state.pathC.active && state.pathC.stage === "done") {
-        // Path C inferred everything and finished its own questions — chat has no other
-        // way to advance without this, since mobile has no separate Continue button here.
-        synthetic = { text: "Ready to lock this in?", suggestions: [{ q: "Continue to Refine & Accessories", action: "pathc:finish" }] };
-      }
+      const synthetic = isCurrent && !answered ? { text: step.title, suggestions: step.options.map((o) => ({ q: o.label, action: `select:${step.id}:${o.id}` })) } : null;
       blocks.push({ key: step.key, entries, synthetic });
     } else if (step.subQuestions) {
       const powerDone = !!state.answers.power;

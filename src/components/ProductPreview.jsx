@@ -24,8 +24,9 @@ export default function ProductPreview({ variant, force }) {
   const sub = rec.rack || "Rack — pending";
   const image = PRODUCT_IMAGES[rec.gridSize] || PRODUCT_IMAGE_FALLBACK;
   const isSummary = variant === "summary";
-  const showAddons = variant === "refine" || isSummary;
-  const addons = showAddons ? getAddonTiles(rec) : [];
+  // Show addon tiles as soon as they're set, same as mobile's product zone —
+  // not just once the user reaches refine/summary.
+  const addons = getAddonTiles(rec);
 
   return (
     <motion.div

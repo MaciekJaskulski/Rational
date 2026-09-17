@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useAppState, useAppDispatch, useRecommendation } from "../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../data/engine";
-import { ACCESSORIES_BY_FOCUS } from "../data/accessories";
 import ChatPanel from "./ChatPanel";
 
 export default function RefineScreen() {
@@ -15,8 +14,6 @@ export default function RefineScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const focusAccessories = ACCESSORIES_BY_FOCUS[state.answers.focus] || [];
-
   function set(field, value) {
     dispatch({ type: "SET_OVERRIDE", field, value });
   }
@@ -29,7 +26,7 @@ export default function RefineScreen() {
     <div className="content-row">
       <div className="refine-panel">
         <div className="refine-controls">
-          <div className="step-label">STEP 5 OF 6 — REFINE &amp; ACCESSORIES</div>
+          <div className="step-label">STEP 5 OF 6 — REFINE</div>
           <h1 className="q-title" style={{ fontSize: 26 }}>
             Here's the full build — tweak anything that doesn't fit
           </h1>
@@ -83,25 +80,6 @@ export default function RefineScreen() {
               ))}
             </div>
           </div>
-
-          {focusAccessories.length > 0 && (
-            <div className="refine-field">
-              <label>Accessories</label>
-              {focusAccessories.map((a) => {
-                const on = !!state.accessories.find((x) => x.id === a.id);
-                return (
-                  <div className="accessory-row" key={a.id}>
-                    <span>
-                      <strong>{a.label}</strong> — {a.detail}
-                    </span>
-                    <button className="btn btn-back" style={{ padding: "6px 14px" }} onClick={() => dispatch({ type: "TOGGLE_ACCESSORY", accessory: a })}>
-                      {on ? "Remove" : "Add"}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
 
         <ChatPanel stepKey="refine" chatLog={chatLog} onAskAnything={askAnything} />

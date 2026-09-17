@@ -1,8 +1,7 @@
 import { createContext, useContext, useReducer, useCallback } from "react";
 import { STEPS } from "../data/steps";
 import { findOption, computeRecommendation } from "../data/engine";
-import { inferFromText, detectPower, detectVentilation } from "../data/nlu";
-import { ACCESSORIES_BY_FOCUS, UPSELL_INTRO } from "../data/accessories";
+import { inferFromText } from "../data/nlu";
 import { matchSupportTopic, isCompareQuery, buildComparison, supportFollowUps, PRO_VS_CLASSIC, SUPPORT_TOPICS } from "../data/knowledge";
 
 const STEP4 = STEPS[3];
@@ -24,7 +23,7 @@ function initialState() {
     sentToAdvisor: false,
     pathC: {
       active: false,
-      stage: null, // 'confirm_business' | 'power' | 'ventilation' | 'upsell' | 'done'
+      stage: null, // 'confirm_business' | 'stepping' (walking through the real guided steps, chat-narrated)
       inference: null,
       ventilationAssumed: false,
     },
@@ -41,32 +40,12 @@ function pushChat(chatByStep, stepKey, entry) {
   return { ...chatByStep, [stepKey]: list };
 }
 
-const CONTINUE_TO_REFINE_SUGGESTION = { q: "Continue to Refine & Accessories", a: null, action: "pathc:finish" };
-
 // Whatever decision is still open right now — attached to any Zoe response so
 // the conversation never dead-ends, especially on mobile where chat is the
-// only way to keep moving through guided selling.
+// only way to keep moving through guided selling. Only the refine screen has
+// a fixed set of these left — everything else is handled by the step-aware
+// "ready to continue" nudge below.
 function getPendingSuggestions(state) {
-  if (state.pathC.active) {
-    const stage = state.pathC.stage;
-    if (stage === "power") {
-      return STEP4.subQuestions[0].options.map((o) => ({ q: o.label, a: null, action: `power:${o.id}` }));
-    }
-    if (stage === "ventilation") {
-      return STEP4.subQuestions[1].options
-        .map((o) => ({ q: o.label, a: null, action: `vent:${o.id}` }))
-        .concat([{ q: "Not sure yet", a: null, action: "vent:unsure" }]);
-    }
-    if (stage === "upsell") {
-      const focusId = state.answers.focus;
-      return (ACCESSORIES_BY_FOCUS[focusId] || [])
-        .map((a) => ({ q: `Add ${a.label}`, a: null, action: `accessory:${a.id}` }))
-        .concat([{ q: "No thanks", a: null, action: "accessory:none" }]);
-    }
-    if (stage === "done" && state.screen === "guided") {
-      return [CONTINUE_TO_REFINE_SUGGESTION];
-    }
-  }
   if (state.screen === "refine") {
     return [
       { q: "What's actually different between Classic and Pro day-to-day?", a: PRO_VS_CLASSIC },
@@ -75,6 +54,71 @@ function getPendingSuggestions(state) {
     ];
   }
   return null;
+}
+
+// Advances from the current guided step to the next one — shared by the
+// physical Continue button (CONTINUE) and the chat-narrated Path C flow
+// (PATHC_ADVANCE), so both produce the exact same result.
+function advanceToNextStep(state) {
+  const nextStep = state.currentStep + 1;
+  if (nextStep > 4) {
+    return { ...state, screen: "refine", furthestStep: Math.max(state.furthestStep, 5) };
+  }
+  const nextKey = stepKeyFor(nextStep);
+  let chatByStep = state.chatByStep;
+  if (!chatByStep[nextKey] || chatByStep[nextKey].length === 0) {
+    chatByStep = pushChat(chatByStep, nextKey, {
+      type: "transition",
+      text: STEPS.find((s) => s.id === nextStep).transition,
+    });
+  }
+  return {
+    ...state,
+    currentStep: nextStep,
+    furthestStep: Math.max(state.furthestStep, nextStep),
+    chatByStep,
+  };
+}
+
+// True once the CURRENT step (or refine/summary) has its primary answer —
+// gates the "ready to continue" nudge so it only appears once there's
+// actually somewhere to advance TO. Step 4 only requires power (matches how
+// far the chat-narrated flow gets before offering to move on to refine).
+function currentStepAnswered(state) {
+  if (state.screen === "refine" || state.screen === "summary") return true;
+  if (state.screen !== "guided") return false;
+  const step = STEPS.find((s) => s.id === state.currentStep);
+  if (!step) return false;
+  if (step.options) return !!state.answers[step.key];
+  if (step.subQuestions) return !!state.answers.power;
+  return false;
+}
+
+const NEXT_STEP_PROMPTS = {
+  1: "Ready to select racks?",
+  2: "Ready to talk about where this'll live in your kitchen?",
+  3: "Are you ready to move on to installation type?",
+  4: "Are you ready to refine your choice and check add-ons?",
+};
+
+// What to ask, and what "Yes" should do, given where the conversation
+// currently sits — used to chain a step-aware "ready to continue" prompt
+// onto any tangential answer once the current step is already answered.
+function nudgeForState(state) {
+  if (state.screen === "refine") {
+    return { prompt: "Do you want me to summarize your choice?", yesAction: "pathc:summarize" };
+  }
+  if (state.screen !== "guided") return null;
+  const prompt = NEXT_STEP_PROMPTS[state.currentStep];
+  return prompt ? { prompt, yesAction: "pathc:advance" } : null;
+}
+
+function nudgeSuggestions(nudge) {
+  if (!nudge) return null;
+  return [
+    { q: "Yes, let's continue", a: null, action: nudge.yesAction },
+    { q: "Not yet — I have more questions", a: "No rush — ask anything else, and just say the word when you're ready to move on.", action: null },
+  ];
 }
 
 function reducer(state, action) {
@@ -152,6 +196,22 @@ function reducer(state, action) {
       const msg = list[msgIndex];
       if (!msg || !msg.suggestions) return state;
       const s = msg.suggestions[suggestionIndex];
+
+      if (state.pathC.active && currentStepAnswered(state)) {
+        // Chat-narrated Path C flow, current step already answered — chain
+        // the same step-aware "ready to continue" prompt tapping a curated
+        // question gets, same as typing one would.
+        const nudge = nudgeForState(state);
+        list.push({
+          type: "qa",
+          q: s.q,
+          a: nudge ? `${s.a} ${nudge.prompt}` : s.a,
+          citation: s.citation || null,
+          suggestions: nudge ? nudgeSuggestions(nudge) : s.topicId ? supportFollowUps(s.topicId) : null,
+        });
+        return { ...state, chatByStep: { ...state.chatByStep, [stepKey]: list } };
+      }
+
       // Support-topic suggestions chain into the OTHER topics, so browsing
       // installation/warranty/service/support doesn't dead-end after one tap.
       const followUps = s.topicId ? supportFollowUps(s.topicId) : null;
@@ -196,29 +256,38 @@ function reducer(state, action) {
       if (pathCStage === "confirm_business") {
         // Still deciding whether to confirm the inferred business type — a
         // detour question shouldn't re-litigate that decision, just answer
-        // it and gently check whether they're ready to move on. Kept as ONE
-        // message (not two) so the answer is never scrolled out of view by
-        // a second bubble arriving right after it, and so only one
-        // StreamedText streams at a time.
+        // it and check whether they're ready to move on to the real next
+        // step (culinary focus / racks). Kept as ONE message (not two) so
+        // the answer is never scrolled out of view by a second bubble
+        // arriving right after it, and so only one StreamedText streams at
+        // a time. "Yes" reuses pathc:confirm — same "the estimate's right,
+        // let's move on" meaning as the original confirm chip.
         list.push({
           type: "assistant",
-          text: `${answerText} Are you ready to move on to installation type?`,
+          text: `${answerText} ${NEXT_STEP_PROMPTS[1]}`,
           citation,
           suggestions: [
             { q: "Yes, let's continue", a: null, action: "pathc:confirm" },
-            { q: "Not yet — I have more questions", a: "No rush — ask anything else, and just say the word when you're ready to move on to installation.", action: null },
+            { q: "Not yet — I have more questions", a: "No rush — ask anything else, and just say the word when you're ready to move on.", action: null },
           ],
         });
-      } else if (pathCStage) {
-        // Path C is mid-flow (power/ventilation/upsell/done) — keep steering
-        // back to whatever question is actually still pending, rather than
-        // sidetracking into unrelated topics.
-        list.push({ type: "assistant", text: answerText, citation, suggestions: getPendingSuggestions(state) });
+      } else if (state.pathC.active && currentStepAnswered(state)) {
+        // Chat-narrated Path C flow, current step already answered — chain
+        // a step-aware "ready to continue" prompt onto the answer so the
+        // conversation keeps advancing through the real guided steps.
+        const nudge = nudgeForState(state);
+        list.push({
+          type: "assistant",
+          text: nudge ? `${answerText} ${nudge.prompt}` : answerText,
+          citation,
+          suggestions: nudge ? nudgeSuggestions(nudge) : matchedTopicId ? supportFollowUps(matchedTopicId) : null,
+        });
       } else {
-        // Plain guided flow (no Path C), or the refine screen — offer
-        // logically related follow-ups: other support topics when the
-        // question matched one, otherwise whatever's still open (refine's
-        // own follow-ups) or a generic, still-grounded set of topics.
+        // Plain guided flow (no Path C), or the refine screen reached
+        // without Path C — offer logically related follow-ups: other
+        // support topics when the question matched one, otherwise
+        // whatever's still open (refine's own follow-ups) or a generic,
+        // still-grounded set of topics.
         const suggestions = matchedTopicId ? supportFollowUps(matchedTopicId) : getPendingSuggestions(state) || supportFollowUps(null);
         list.push({ type: "assistant", text: answerText, citation, suggestions });
       }
@@ -226,26 +295,11 @@ function reducer(state, action) {
       return { ...state, chatByStep: { ...state.chatByStep, [stepKey]: list } };
     }
 
-    case "CONTINUE": {
-      const nextStep = state.currentStep + 1;
-      if (nextStep > 4) {
-        return { ...state, screen: "refine", furthestStep: Math.max(state.furthestStep, 5) };
-      }
-      const nextKey = stepKeyFor(nextStep);
-      let chatByStep = state.chatByStep;
-      if (!chatByStep[nextKey] || chatByStep[nextKey].length === 0) {
-        chatByStep = pushChat(chatByStep, nextKey, {
-          type: "transition",
-          text: STEPS.find((s) => s.id === nextStep).transition,
-        });
-      }
-      return {
-        ...state,
-        currentStep: nextStep,
-        furthestStep: Math.max(state.furthestStep, nextStep),
-        chatByStep,
-      };
-    }
+    case "CONTINUE":
+      return advanceToNextStep(state);
+
+    case "PATHC_ADVANCE":
+      return advanceToNextStep(state);
 
     case "SEED_REFINE": {
       if (state.chatByStep.refine && state.chatByStep.refine.length > 0) return state;
@@ -299,7 +353,16 @@ function reducer(state, action) {
       }
       let chatByStep = state.chatByStep;
       if (text) {
-        chatByStep = pushChat(chatByStep, "refine", { type: "fact", text });
+        if (state.pathC.active) {
+          const nudge = nudgeForState(state);
+          chatByStep = pushChat(chatByStep, "refine", {
+            type: "fact",
+            text: nudge ? `${text} ${nudge.prompt}` : text,
+            suggestions: nudge ? nudgeSuggestions(nudge) : null,
+          });
+        } else {
+          chatByStep = pushChat(chatByStep, "refine", { type: "fact", text });
+        }
       }
       return { ...state, overrides, chatByStep };
     }
@@ -357,15 +420,13 @@ function reducer(state, action) {
     }
 
     case "PATHC_CONFIRM": {
-      let chatByStep = pushChat(state.chatByStep, "meals", {
-        type: "assistant",
-        text: "Good — two quick things I can't guess from a description: what's your power connection, electric or gas?",
-        suggestions: [
-          { q: "Electric", a: null, action: "power:electric" },
-          { q: "Gas", a: null, action: "power:gas" },
-        ],
-      });
-      return { ...state, chatByStep, pathC: { ...state.pathC, stage: "power" } };
+      // "The estimate's right" — hand off from Path C's own business-type
+      // inference into the real guided steps, exactly like clicking
+      // Continue would. From here on, steps 2-5 are answered for real (real
+      // option cards / sub-questions), with the "ready to continue" nudge
+      // (ASK_ANYTHING / TAP_SUGGESTION / SET_OVERRIDE, above) carrying the
+      // chat narration forward after any tangential question.
+      return { ...advanceToNextStep(state), pathC: { ...state.pathC, stage: "stepping" } };
     }
 
     case "PATHC_UPSIZE": {
@@ -373,13 +434,10 @@ function reducer(state, action) {
       const rec = computeRecommendation(answers);
       const chatByStep = pushChat(state.chatByStep, "meals", {
         type: "assistant",
-        text: `Got it, bumping you to a ${rec.gridSize} ${rec.line} — that extra volume is exactly where Pro's sensor-adjusted cooking and automated cleaning earn their keep. Two quick things I can't guess from a description: what's your power connection, electric or gas?`,
-        suggestions: [
-          { q: "Electric", a: null, action: "power:electric" },
-          { q: "Gas", a: null, action: "power:gas" },
-        ],
+        text: `Got it, bumping you to a ${rec.gridSize} ${rec.line} — that extra volume is exactly where Pro's sensor-adjusted cooking and automated cleaning earn their keep.`,
       });
-      return { ...state, answers, chatByStep, pathC: { ...state.pathC, stage: "power" } };
+      const advanced = advanceToNextStep({ ...state, answers, chatByStep });
+      return { ...advanced, pathC: { ...state.pathC, stage: "stepping" } };
     }
 
     case "PATHC_WHY": {
@@ -393,75 +451,6 @@ function reducer(state, action) {
         ],
       });
       return { ...state, chatByStep };
-    }
-
-    case "PATHC_SET_POWER": {
-      const power = action.power;
-      const opt = findOption("power", power);
-      const answers = { ...state.answers, power };
-      const chatByStep = pushChat(state.chatByStep, "meals", {
-        type: "fact",
-        text: `${opt.factBubble} And is there anything required for ventilation — do you already have extraction in place, or will you need a hood?`,
-        suggestions: [
-          { q: "I already have extraction", a: null, action: "vent:have_extraction" },
-          { q: "I need a condensation hood", a: null, action: "vent:condensation" },
-          { q: "I need a full extraction hood", a: null, action: "vent:extraction" },
-          { q: "Not sure yet", a: null, action: "vent:unsure" },
-        ],
-      });
-      return { ...state, answers, chatByStep, pathC: { ...state.pathC, stage: "ventilation" } };
-    }
-
-    case "PATHC_SET_VENTILATION": {
-      const { ventilation, unsure } = action;
-      const focusId = state.answers.focus;
-      const upsellText = UPSELL_INTRO[focusId] || "a couple of accessories tailored to your kitchen";
-      let answers = state.answers;
-      let ventilationText;
-      if (unsure) {
-        answers = { ...answers, ventilation: "extraction" };
-        ventilationText =
-          "No problem — I'll assume you'll need a full extraction hood for now, based on typical smoke/grease output for this kind of kitchen. Your installer can confirm on-site and we'll adjust if needed.";
-      } else {
-        answers = { ...answers, ventilation };
-        ventilationText = findOption("ventilation", ventilation).factBubble;
-      }
-      const chatByStep = pushChat(state.chatByStep, "meals", {
-        type: "assistant",
-        text: `${ventilationText} Since you're running this kind of kitchen, a lot of operators pair this build with ${upsellText}. Want to add either?`,
-        suggestions: (ACCESSORIES_BY_FOCUS[focusId] || []).map((a) => ({ q: `Add ${a.label}`, a: null, action: `accessory:${a.id}` })).concat([{ q: "No thanks", a: null, action: "accessory:none" }]),
-      });
-      return { ...state, answers, chatByStep, pathC: { ...state.pathC, stage: "upsell", ventilationAssumed: !!unsure } };
-    }
-
-    case "PATHC_ADD_ACCESSORY": {
-      const focusId = state.answers.focus;
-      const list = ACCESSORIES_BY_FOCUS[focusId] || [];
-      const acc = list.find((a) => a.id === action.accessoryId);
-      if (!acc) {
-        const chatByStep = pushChat(state.chatByStep, "meals", {
-          type: "assistant",
-          text: "No problem — you can always add accessories later from the Refine & Accessories screen.",
-          suggestions: [CONTINUE_TO_REFINE_SUGGESTION],
-        });
-        return { ...state, chatByStep, pathC: { ...state.pathC, stage: "done" } };
-      }
-      const accessories = state.accessories.find((a) => a.id === acc.id) ? state.accessories : [...state.accessories, acc];
-      const chatByStep = pushChat(state.chatByStep, "meals", {
-        type: "assistant",
-        text: `Added — ${acc.detail}`,
-        suggestions: [CONTINUE_TO_REFINE_SUGGESTION],
-      });
-      return { ...state, accessories, chatByStep, pathC: { ...state.pathC, stage: "done" } };
-    }
-
-    case "PATHC_FINISH": {
-      return {
-        ...state,
-        currentStep: 5,
-        furthestStep: Math.max(state.furthestStep, 5),
-        screen: action.target === "summary" ? "summary" : "refine",
-      };
     }
 
     default:

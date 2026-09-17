@@ -12,7 +12,7 @@ export const STEPS = [
     subtitle:
       "This is the single biggest factor in sizing your unit — it sets the grid count we'll recommend.",
     transition:
-      "I'll add detail as you go — happy to explain the 'why' behind anything, but feel free to just click through if you already know what you need.",
+      "Hi, I'm Zoe — I'll help you find the right RATIONAL combi oven for your kitchen. You can click through the questions on the left, or just tell me about your kitchen here and I'll get you started. Either way, I'll explain the 'why' behind every recommendation, and you can ask me anything along the way — specs, installation, warranty, whatever you need.",
     options: [
       {
         id: "up_to_30",
@@ -243,7 +243,7 @@ export const STEPS = [
             factBubble: "Since you've already got extraction, we won't add a hood to the quote — that's a meaningful cost and install-time saving.",
             suggestions: [
               { q: "How do I know my existing extraction is sufficient?", a: "It should match the unit's rated exhaust airflow — your installer can confirm against the spec sheet during a site visit." },
-              { q: "What's left before I get a final quote?", a: "Just the Refine & Accessories screen to confirm grid size, stand, and rack, then Summary." },
+              { q: "What's left before I get a final quote?", a: "Just the Refine screen to confirm grid size, stand, and rack, then Summary." },
               { q: "Can I add a hood later if I need one?", a: "Yes, though it's more disruptive once the kitchen is built out — most operators decide on ventilation before installation." },
             ],
           },

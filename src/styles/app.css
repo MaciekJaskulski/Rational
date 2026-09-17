@@ -74,6 +74,8 @@ button {
 
 /* ---------------- Header ---------------- */
 .header {
+  position: relative;
+  z-index: 10;
   height: 50px;
   padding: 14px 20px;
   display: flex;

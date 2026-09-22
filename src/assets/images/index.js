@@ -1,11 +1,11 @@
 import demoCanvas from "./bg/demo-canvas3.png";
-import icombiPro61 from "./products/icombi-pro-6-1.png";
-import icombiPro62 from "./products/icombi-pro-6-2.png";
-import icombiPro101 from "./products/icombi-pro-10-1.png";
+import icombiPro61 from "./products/iCombi Pro 6-1 1G  Standard leer frontal.jpg";
+import icombiPro62 from "./products/iCombi Pro 6-2 1 E Standard Zubehör Catering.jpg";
+import icombiPro101 from "./products/iCombi Pro 10-1 1 E Linksanschlag Zubehör front.jpg";
 import icombiPro102 from "./products/icombi-pro-10-2.png";
-import icombiPro201 from "./products/icombi-pro-20-1.png";
+import icombiPro201 from "./products/iCombi Pro 20-1 1 E Standard leer front.jpg";
 import icombiPro202 from "./products/icombi-pro-20-2.png";
-import icombiProXs from "./products/icombi-pro-xs.png";
+import icombiProXs from "./products/iCombi Pro XS 6-2 3 E Zubehör front.jpg";
 
 export const BG_CANVAS = demoCanvas;
 

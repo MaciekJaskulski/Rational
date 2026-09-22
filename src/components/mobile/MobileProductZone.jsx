@@ -46,7 +46,7 @@ export default function MobileProductZone() {
           })}
         </div>
       )}
-      <ThreeDModal open={show3d} onClose={() => setShow3d(false)} />
+      <ThreeDModal open={show3d} onClose={() => setShow3d(false)} gridSize={rec.gridSize} />
     </div>
   );
 }

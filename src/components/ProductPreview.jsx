@@ -69,7 +69,7 @@ export default function ProductPreview({ variant, force }) {
         )}
       </div>
 
-      <ThreeDModal open={show3d} onClose={() => setShow3d(false)} />
+      <ThreeDModal open={show3d} onClose={() => setShow3d(false)} gridSize={rec.gridSize} />
     </motion.div>
   );
 }

@@ -6,6 +6,8 @@ import StreamedText from "../chat/StreamedText";
 import resolveAction from "../chat/resolveAction";
 import Citation from "../chat/Citation";
 
+const LIVE_EVENT_URL = "https://www.rational-online.com/en_gb/see-for-yourself/rational-live-events/index.php";
+
 const REFINE_FIELD_META = {
   gridSize: { label: "grid size", options: gridSizeOptions },
   stand: { label: "stand", options: standOptions },
@@ -407,6 +409,9 @@ export default function MobileChatTab() {
             </button>
             <a className="m-suggestion-chip" href="https://www.rational-online.com/en_gb/customercare/rational-dealer/" target="_blank" rel="noreferrer">
               {t("Find a local dealer")}
+            </a>
+            <a className="m-suggestion-chip" href={LIVE_EVENT_URL} target="_blank" rel="noreferrer">
+              {t("Sign up to a live event")}
             </a>
           </div>
         </div>

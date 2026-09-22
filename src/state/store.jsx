@@ -404,6 +404,39 @@ function reducer(state, action) {
 
     case "START_FREE_TEXT": {
       const { text } = action;
+
+      // A comparison or support question typed as the very first message
+      // (before any guided answer, so Path C hasn't activated yet) used to
+      // fall straight into kitchen-description inference below, which
+      // doesn't recognize it — inferFromText returns null and the message
+      // dead-ends with no reply. Answer these the same way ASK_ANYTHING
+      // does, before ever attempting inference.
+      const currentRec = computeRecommendation(state.answers, state.overrides);
+      const supportTopic = matchSupportTopic(text);
+      if (isCompareQuery(text)) {
+        const chatByStep = pushChat(state.chatByStep, "meals", { type: "user", text });
+        return {
+          ...state,
+          chatByStep: pushChat(chatByStep, "meals", {
+            type: "assistant",
+            text: buildComparison(text, currentRec, state.lang),
+            suggestions: supportFollowUps(null),
+          }),
+        };
+      }
+      if (supportTopic) {
+        const chatByStep = pushChat(state.chatByStep, "meals", { type: "user", text });
+        return {
+          ...state,
+          chatByStep: pushChat(chatByStep, "meals", {
+            type: "assistant",
+            text: supportTopic.answer,
+            citation: supportTopic.citation,
+            suggestions: supportFollowUps(supportTopic.id),
+          }),
+        };
+      }
+
       const inference = inferFromText(text);
       if (!inference) {
         return {

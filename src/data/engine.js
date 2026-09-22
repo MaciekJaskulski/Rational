@@ -27,8 +27,13 @@ export function computeScore(answers) {
   return score;
 }
 
-export function computeLine(score) {
-  return score >= 3 ? "iCombi Pro" : "iCombi Classic";
+export function computeLine() {
+  // This demo only has assets and content for iCombi Pro — the Classic-vs-Pro
+  // score is kept internally (RefineScreen shows it, and Zoe's knowledge
+  // base still answers Classic-vs-Pro questions), but the recommended line
+  // itself must never surface "iCombi Classic" since there's no Classic
+  // product photo or 3D model to back it up.
+  return "iCombi Pro";
 }
 
 export function computeGridSize(answers) {

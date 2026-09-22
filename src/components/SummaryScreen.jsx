@@ -4,6 +4,7 @@ import ProductPreview from "./ProductPreview";
 import LeadGenModal from "./LeadGenModal";
 
 const DEALER_LOCATOR_URL = "https://www.rational-online.com/en_gb/customercare/rational-dealer/?zipKey=London%2C+UK";
+const LIVE_EVENT_URL = "https://www.rational-online.com/en_gb/see-for-yourself/rational-live-events/index.php";
 
 export default function SummaryScreen() {
   const state = useAppState();
@@ -49,6 +50,9 @@ export default function SummaryScreen() {
           </button>
           <a className="btn btn-back" href={DEALER_LOCATOR_URL} target="_blank" rel="noreferrer">
             {t("Find your local dealer")}
+          </a>
+          <a className="btn btn-back" href={LIVE_EVENT_URL} target="_blank" rel="noreferrer">
+            {t("Sign up to a live event")}
           </a>
         </div>
 

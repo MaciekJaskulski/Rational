@@ -3,6 +3,7 @@ import { useAppState, useAppDispatch, useT } from "../../state/store";
 import LeadGenModal from "../LeadGenModal";
 
 const DEALER_LOCATOR_URL = "https://www.rational-online.com/en_gb/customercare/rational-dealer/?zipKey=London%2C+UK";
+const LIVE_EVENT_URL = "https://www.rational-online.com/en_gb/see-for-yourself/rational-live-events/index.php";
 
 function canContinue(state) {
   const step = state.currentStep;
@@ -68,6 +69,9 @@ export default function MobileBottomBar() {
         </button>
         <a className="m-btn m-btn-back" href={DEALER_LOCATOR_URL} target="_blank" rel="noreferrer">
           {t("Find a dealer")}
+        </a>
+        <a className="m-btn m-btn-back" href={LIVE_EVENT_URL} target="_blank" rel="noreferrer">
+          {t("Sign up to a live event")}
         </a>
       </div>
       <LeadGenModal open={showLeadGen} onClose={() => setShowLeadGen(false)} />

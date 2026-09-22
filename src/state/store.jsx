@@ -4,7 +4,8 @@ import { findOption, computeRecommendation } from "../data/engine";
 import { inferFromText } from "../data/nlu";
 import { matchSupportTopic, isCompareQuery, buildComparison, supportFollowUps, PRO_VS_CLASSIC, SUPPORT_TOPICS } from "../data/knowledge";
 import { translate } from "../i18n/dictionary";
-import { freeTextRecapMessage, upsizeMessage, whyMessage } from "../i18n/messages";
+import { freeTextRecapMessage, upsizeMessage, whyMessage, xsGateSwitchText } from "../i18n/messages";
+import { XS_GATE_ASK, XS_GATE_CITATION, XS_GATE_STAY_TEXT } from "../data/xsGate";
 
 const STEP4 = STEPS[3];
 
@@ -31,6 +32,17 @@ function initialState() {
       inference: null,
       ventilationAssumed: false,
       ventilationUnlocked: false, // mobile-only: gates the ventilation synthetic question behind an explicit "ready?" nudge
+    },
+    // Gates leaving Step 1 whenever XS is picked — the XS skips three
+    // accessories (integrated fat drain, externally attachable core probe,
+    // lockable control panel) the rest of the line has, so this is a real
+    // inserted guided-selling step ("1a"), not a chat aside.
+    xsGate: {
+      active: false,
+      resolved: false, // true once answered once — never re-triggers after that
+      stage: null, // 'ask' | 'choose'
+      answer: null, // pending 'no' | 'yes' selection at the 'ask' stage
+      chosenSize: null, // pending gridSize selection at the 'choose' stage
     },
   };
 }
@@ -65,6 +77,17 @@ function getPendingSuggestions(state) {
 // physical Continue button (CONTINUE) and the chat-narrated Path C flow
 // (PATHC_ADVANCE), so both produce the exact same result.
 function advanceToNextStep(state) {
+  // Leaving Step 1 with XS picked, for the first time — hold here and open
+  // the XS add-on gate instead of moving on. Once xsGate.resolved is true
+  // (either answer), this never fires again for the rest of the session.
+  if (state.currentStep === 1 && state.answers.meals === "xs" && !state.xsGate.resolved && !state.xsGate.active) {
+    const chatByStep = pushChat(state.chatByStep, "meals", {
+      type: "fact",
+      text: XS_GATE_ASK.subtitle,
+      citation: XS_GATE_CITATION,
+    });
+    return { ...state, chatByStep, xsGate: { ...state.xsGate, active: true, stage: "ask" } };
+  }
   const nextStep = state.currentStep + 1;
   if (nextStep > 4) {
     return { ...state, screen: "refine", furthestStep: Math.max(state.furthestStep, 5) };
@@ -317,6 +340,53 @@ function reducer(state, action) {
 
     case "PATHC_UNLOCK_VENTILATION":
       return { ...state, pathC: { ...state.pathC, ventilationUnlocked: true } };
+
+    case "XSGATE_SELECT_ANSWER":
+      return { ...state, xsGate: { ...state.xsGate, answer: action.value } };
+
+    case "XSGATE_SELECT_SIZE":
+      return { ...state, xsGate: { ...state.xsGate, chosenSize: action.gridSize } };
+
+    case "XSGATE_CONTINUE": {
+      if (state.xsGate.stage === "ask") {
+        if (state.xsGate.answer === "yes") {
+          return { ...state, xsGate: { ...state.xsGate, stage: "choose" } };
+        }
+        if (state.xsGate.answer === "no") {
+          const chatByStep = pushChat(state.chatByStep, "meals", { type: "assistant", text: XS_GATE_STAY_TEXT });
+          return advanceToNextStep({
+            ...state,
+            chatByStep,
+            xsGate: { active: false, resolved: true, stage: null, answer: "no", chosenSize: null },
+          });
+        }
+        return state; // no pending answer yet — Continue stays disabled in the UI for this
+      }
+      if (state.xsGate.stage === "choose") {
+        const gridSize = state.xsGate.chosenSize;
+        if (!gridSize) return state;
+        const overrides = { ...state.overrides, gridSize };
+        const chatByStep = pushChat(state.chatByStep, "meals", {
+          type: "assistant",
+          text: xsGateSwitchText(state.lang, gridSize),
+          citation: XS_GATE_CITATION,
+        });
+        return advanceToNextStep({
+          ...state,
+          overrides,
+          chatByStep,
+          xsGate: { active: false, resolved: true, stage: null, answer: "yes", chosenSize: null },
+        });
+      }
+      return state;
+    }
+
+    case "XSGATE_BACK": {
+      if (state.xsGate.stage === "choose") {
+        return { ...state, xsGate: { ...state.xsGate, stage: "ask", chosenSize: null } };
+      }
+      return { ...state, xsGate: { active: false, resolved: false, stage: null, answer: null, chosenSize: null } };
+    }
 
     case "SET_MOBILE_TAB":
       return { ...state, mobileTab: action.tab };

@@ -77,6 +77,7 @@ export function isCompareQuery(text) {
 // Real spec-sheet facts (electric versions), 1/1 GN "half size" line — same
 // cabinet/body between Pro and Classic at each size, per RATIONAL's PDFs.
 export const GRID_FACTS = {
+  XS: { dims: '25¾"W × 24½"D × 23⅜"H', weight: "147 lb", power: "5.7 kW", pans: "6 × 2/3 GN" },
   "6-Grid": { dims: '33½"W × 33⅛"D × 31⅝"H', weight: "218 lb", power: "10.8 kW", pans: "6 × 1/1 GN" },
   "10-Grid": { dims: '33½"W × 33⅛"D × 41⅞"H', weight: "287 lb", power: "18.9 kW", pans: "10 × 1/1 GN" },
   "20-Grid": { dims: '34½"W × 35⅞"D × 73¾"H', weight: "560 lb", power: "37.2 kW", pans: "20 × 1/1 GN, on a mobile rack" },

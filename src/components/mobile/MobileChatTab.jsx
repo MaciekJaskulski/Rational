@@ -2,9 +2,11 @@ import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { STEPS } from "../../data/steps";
 import { useAppState, useAppDispatch, useRecommendation, useT } from "../../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../../data/engine";
+import { XS_GATE_ASK, XS_GATE_CHOOSE, XS_GATE_SUGGESTED } from "../../data/xsGate";
 import StreamedText from "../chat/StreamedText";
 import resolveAction from "../chat/resolveAction";
 import Citation from "../chat/Citation";
+import { downloadConfigPdf } from "../../utils/pdf";
 
 const LIVE_EVENT_URL = "https://www.rational-online.com/en_gb/see-for-yourself/rational-live-events/index.php";
 
@@ -33,7 +35,22 @@ function useConversationBlocks() {
 
     if (step.options) {
       const answered = !!state.answers[step.key];
-      const synthetic = isCurrent && !answered ? { text: t(step.title), suggestions: step.options.map((o) => ({ q: t(o.label), action: `select:${step.id}:${o.id}` })) } : null;
+      let synthetic = null;
+      if (isCurrent && !answered) {
+        synthetic = { text: t(step.title), suggestions: step.options.map((o) => ({ q: t(o.label), action: `select:${step.id}:${o.id}` })) };
+      } else if (isCurrent && step.key === "meals" && state.xsGate.active) {
+        // XS add-on gate ("Step 1a") — same two-stage question as the
+        // desktop/guided-tab panel, rendered here as chat chips instead of
+        // option cards, matching how every other guided step looks in chat.
+        const isChoose = state.xsGate.stage === "choose";
+        const content = isChoose ? XS_GATE_CHOOSE : XS_GATE_ASK;
+        const suggestions = isChoose
+          ? gridSizeOptions()
+              .filter((g) => g !== "XS")
+              .map((g) => ({ q: XS_GATE_SUGGESTED.includes(g) ? `${t(g)} ★ ${t("Suggested")}` : t(g), action: `xsgate:size:${g}` }))
+          : XS_GATE_ASK.options.map((o) => ({ q: t(o.label), action: `xsgate:answer:${o.id}` }));
+        synthetic = { text: t(content.title), suggestions };
+      }
       blocks.push({ key: step.key, entries, synthetic });
     } else if (step.subQuestions) {
       const powerDone = !!state.answers.power;
@@ -265,6 +282,12 @@ export default function MobileChatTab() {
       if (otherDone) dispatch({ type: "CONTINUE" });
       return;
     }
+    if (kind === "xsgate") {
+      if (a === "answer") dispatch({ type: "XSGATE_SELECT_ANSWER", value: b });
+      if (a === "size") dispatch({ type: "XSGATE_SELECT_SIZE", gridSize: b });
+      dispatch({ type: "XSGATE_CONTINUE" });
+      return;
+    }
     resolveAction(dispatch, action);
   }
 
@@ -404,7 +427,7 @@ export default function MobileChatTab() {
             <button type="button" className="m-suggestion-chip m-suggestion-chip--primary" onClick={() => dispatch({ type: "SET_MOBILE_TAB", tab: "guided" })}>
               {t("Let me review my setup")}
             </button>
-            <button type="button" className="m-suggestion-chip">
+            <button type="button" className="m-suggestion-chip" onClick={() => downloadConfigPdf(rec, state, t)}>
               {t("Save as PDF")}
             </button>
             <a className="m-suggestion-chip" href="https://www.rational-online.com/en_gb/customercare/rational-dealer/" target="_blank" rel="noreferrer">

@@ -31,3 +31,13 @@ export function whyMessage(lang, reason) {
   }
   return `${r} — but tell me if your setup's bigger and I'll adjust.`;
 }
+
+// XS add-on gate confirmation — splices a data-driven gridSize into the
+// sentence, so it gets its own per-language template like the others above.
+export function xsGateSwitchText(lang, gridSize) {
+  const gs = translate(gridSize, lang);
+  if (lang === "de") {
+    return `Umgestellt auf ein iCombi Pro ${gs} — damit sind der integrierte Fettablauf, der extern anbringbare Kernfühler und das abschließbare Bedienfeld wieder dabei.`;
+  }
+  return `Switched to iCombi Pro ${gs} — that brings back the integrated fat drain, the externally attachable core probe, and the lockable control panel.`;
+}

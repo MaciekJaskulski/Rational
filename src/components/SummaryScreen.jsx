@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAppState, useAppDispatch, useRecommendation, useT } from "../state/store";
 import ProductPreview from "./ProductPreview";
 import LeadGenModal from "./LeadGenModal";
+import { downloadConfigPdf } from "../utils/pdf";
 
 const DEALER_LOCATOR_URL = "https://www.rational-online.com/en_gb/customercare/rational-dealer/?zipKey=London%2C+UK";
 const LIVE_EVENT_URL = "https://www.rational-online.com/en_gb/see-for-yourself/rational-live-events/index.php";
@@ -42,7 +43,7 @@ export default function SummaryScreen() {
         </p>
 
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-          <button className="btn btn-back" type="button">
+          <button className="btn btn-back" type="button" onClick={() => downloadConfigPdf(rec, state, t)}>
             {t("Save as PDF")}
           </button>
           <button className="btn btn-primary" type="button" onClick={() => setShowLeadGen(true)}>

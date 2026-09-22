@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useAppState, useAppDispatch, useT } from "../../state/store";
+import { useAppState, useAppDispatch, useRecommendation, useT } from "../../state/store";
 import LeadGenModal from "../LeadGenModal";
+import { downloadConfigPdf } from "../../utils/pdf";
 
 const DEALER_LOCATOR_URL = "https://www.rational-online.com/en_gb/customercare/rational-dealer/?zipKey=London%2C+UK";
 const LIVE_EVENT_URL = "https://www.rational-online.com/en_gb/see-for-yourself/rational-live-events/index.php";
 
 function canContinue(state) {
+  if (state.xsGate.active) return state.xsGate.stage === "choose" ? !!state.xsGate.chosenSize : !!state.xsGate.answer;
   const step = state.currentStep;
   if (step === 1) return !!state.answers.meals;
   if (step === 2) return !!state.answers.focus;
@@ -17,6 +19,7 @@ function canContinue(state) {
 export default function MobileBottomBar() {
   const state = useAppState();
   const dispatch = useAppDispatch();
+  const rec = useRecommendation();
   const t = useT();
   const [showLeadGen, setShowLeadGen] = useState(false);
 
@@ -26,11 +29,17 @@ export default function MobileBottomBar() {
   const continueEnabled = isGuided ? canContinue(state) : true;
 
   function handleBack() {
+    if (state.xsGate.active) {
+      dispatch({ type: "XSGATE_BACK" });
+      return;
+    }
     dispatch({ type: "BACK" });
   }
 
   function handleContinue() {
-    if (state.currentStep === 4) {
+    if (state.xsGate.active) {
+      dispatch({ type: "XSGATE_CONTINUE" });
+    } else if (state.currentStep === 4) {
       dispatch({ type: "GO_REFINE" });
     } else {
       dispatch({ type: "CONTINUE" });
@@ -38,7 +47,7 @@ export default function MobileBottomBar() {
   }
 
   if (isGuided) {
-    const isFirstStep = state.currentStep === 1;
+    const isFirstStep = state.currentStep === 1 && !state.xsGate.active;
     return (
       <div className="m-bottom-bar">
         {!isFirstStep && (
@@ -61,7 +70,7 @@ export default function MobileBottomBar() {
         <button type="button" className="m-btn m-btn-back" onClick={handleBack}>
           {t("Back")}
         </button>
-        <button type="button" className="m-btn m-btn-back">
+        <button type="button" className="m-btn m-btn-back" onClick={() => downloadConfigPdf(rec, state, t)}>
           {t("Save as PDF")}
         </button>
         <button type="button" className="m-btn m-btn-primary" onClick={() => setShowLeadGen(true)}>

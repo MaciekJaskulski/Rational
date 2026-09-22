@@ -1,12 +1,72 @@
 import { STEPS } from "../../data/steps";
 import { useAppState, useAppDispatch, useRecommendation, useT } from "../../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../../data/engine";
+import { XS_GATE_ASK, XS_GATE_CHOOSE, XS_GATE_SUGGESTED } from "../../data/xsGate";
+
+// Mirrors desktop's XsGatePanel — same two stages, mobile card styling.
+function XsGateQuestion() {
+  const state = useAppState();
+  const dispatch = useAppDispatch();
+  const t = useT();
+  const { stage, answer, chosenSize } = state.xsGate;
+  const isChoose = stage === "choose";
+  const content = isChoose ? XS_GATE_CHOOSE : XS_GATE_ASK;
+
+  return (
+    <>
+      <div className="m-step-label">{t(content.shortLabel)}</div>
+      <h1 className="m-q-title">{t(content.title)}</h1>
+      <p className="m-q-subtitle">{t(content.subtitle)}</p>
+
+      <div className="m-options">
+        {!isChoose &&
+          XS_GATE_ASK.options.map((opt) => {
+            const selected = answer === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                className={`m-option-card ${selected ? "selected" : ""}`}
+                onClick={() => dispatch({ type: "XSGATE_SELECT_ANSWER", value: opt.id })}
+              >
+                <div className="m-option-text">
+                  <span className="m-option-title">{t(opt.label)}</span>
+                  <span className="m-option-sub">{t(opt.sublabel)}</span>
+                </div>
+                <div className={`m-option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>
+              </button>
+            );
+          })}
+        {isChoose &&
+          gridSizeOptions()
+            .filter((g) => g !== "XS")
+            .map((g) => {
+              const selected = chosenSize === g;
+              const suggested = XS_GATE_SUGGESTED.includes(g);
+              return (
+                <button key={g} type="button" className={`m-option-card ${selected ? "selected" : ""}`} onClick={() => dispatch({ type: "XSGATE_SELECT_SIZE", gridSize: g })}>
+                  <div className="m-option-text">
+                    <span className="m-option-title">
+                      {t(g)}
+                      {suggested && <span className="option-suggested-badge">{t("Suggested")}</span>}
+                    </span>
+                  </div>
+                  <div className={`m-option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>
+                </button>
+              );
+            })}
+      </div>
+    </>
+  );
+}
 
 function StepQuestion() {
   const state = useAppState();
   const dispatch = useAppDispatch();
   const t = useT();
   const step = STEPS.find((s) => s.id === state.currentStep);
+
+  if (state.xsGate.active) return <XsGateQuestion />;
 
   return (
     <>

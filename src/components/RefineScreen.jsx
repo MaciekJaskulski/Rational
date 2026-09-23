@@ -1,26 +1,13 @@
-import { useEffect } from "react";
-import { useAppState, useAppDispatch, useRecommendation, useT } from "../state/store";
+import { useAppDispatch, useRecommendation, useT } from "../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../data/engine";
-import ChatPanel from "./ChatPanel";
 
 export default function RefineScreen() {
-  const state = useAppState();
   const dispatch = useAppDispatch();
   const rec = useRecommendation();
   const t = useT();
-  const chatLog = state.chatByStep.refine || [];
-
-  useEffect(() => {
-    dispatch({ type: "SEED_REFINE" });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   function set(field, value) {
     dispatch({ type: "SET_OVERRIDE", field, value });
-  }
-
-  function askAnything(text) {
-    dispatch({ type: "ASK_ANYTHING", stepKey: "refine", text });
   }
 
   return (
@@ -93,8 +80,6 @@ export default function RefineScreen() {
             </button>
           </div>
         </div>
-
-        <ChatPanel stepKey="refine" chatLog={chatLog} onAskAnything={askAnything} />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useAppState, useAppDispatch, useT } from "../../state/store";
 
-export default function MobileHeader({ activeTab, onTabChange }) {
+export default function MobileHeader() {
   const state = useAppState();
   const dispatch = useAppDispatch();
   const t = useT();
@@ -20,14 +20,6 @@ export default function MobileHeader({ activeTab, onTabChange }) {
             {t("Restart")}
           </button>
         </div>
-      </div>
-      <div className="m-tabbar">
-        <button type="button" className={`m-tab ${activeTab === "guided" ? "active" : ""}`} onClick={() => onTabChange("guided")}>
-          {t("Guided selling")}
-        </button>
-        <button type="button" className={`m-tab ${activeTab === "chat" ? "active" : ""}`} onClick={() => onTabChange("chat")}>
-          <span className="m-tab-icon">✨</span> {t("Talk about it")}
-        </button>
       </div>
     </div>
   );

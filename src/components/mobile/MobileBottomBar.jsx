@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAppState, useAppDispatch, useRecommendation, useT } from "../../state/store";
+import { XS_GATE_SUBQUESTIONS, xsGateAnyYes } from "../../data/xsGate";
 import LeadGenModal from "../LeadGenModal";
 import { downloadConfigPdf } from "../../utils/pdf";
 
@@ -7,7 +8,7 @@ const DEALER_LOCATOR_URL = "https://www.rational-online.com/en_gb/customercare/r
 const LIVE_EVENT_URL = "https://www.rational-online.com/en_gb/see-for-yourself/rational-live-events/index.php";
 
 function canContinue(state) {
-  if (state.xsGate.active) return state.xsGate.stage === "choose" ? !!state.xsGate.chosenSize : !!state.xsGate.answer;
+  if (state.xsGate.active) return !!state.xsGate.answers[XS_GATE_SUBQUESTIONS[state.xsGate.subStep].key];
   const step = state.currentStep;
   if (step === 1) return !!state.answers.meals;
   if (step === 2) return !!state.answers.focus;
@@ -28,9 +29,11 @@ export default function MobileBottomBar() {
   const isGuided = state.screen === "guided";
   const continueEnabled = isGuided ? canContinue(state) : true;
 
+  const xsGateAskAnyYes = state.xsGate.active && xsGateAnyYes(state.xsGate.answers);
+
   function handleBack() {
     if (state.xsGate.active) {
-      dispatch({ type: "XSGATE_BACK" });
+      dispatch({ type: xsGateAskAnyYes ? "XSGATE_RESTART" : "XSGATE_BACK" });
       return;
     }
     dispatch({ type: "BACK" });
@@ -52,7 +55,7 @@ export default function MobileBottomBar() {
       <div className="m-bottom-bar">
         {!isFirstStep && (
           <button type="button" className="m-btn m-btn-back" onClick={handleBack}>
-            {t("Back")}
+            {xsGateAskAnyYes ? t("Pick a different oven (recommended)") : t("Back")}
           </button>
         )}
         <button type="button" className="m-btn m-btn-primary" onClick={handleContinue} disabled={!continueEnabled}>

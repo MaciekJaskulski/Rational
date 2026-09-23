@@ -1,61 +1,50 @@
 import { STEPS } from "../../data/steps";
 import { useAppState, useAppDispatch, useRecommendation, useT } from "../../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../../data/engine";
-import { XS_GATE_ASK, XS_GATE_CHOOSE, XS_GATE_SUGGESTED } from "../../data/xsGate";
+import { XS_GATE_SUBQUESTIONS } from "../../data/xsGate";
+import Citation from "../chat/Citation";
 
-// Mirrors desktop's XsGatePanel — same two stages, mobile card styling.
+// Mirrors desktop's XsGatePanel — same 3-question subflow, mobile card
+// styling. The CTA row (Back/Continue vs. "Pick a different oven") lives in
+// MobileBottomBar, same as every other guided step.
 function XsGateQuestion() {
   const state = useAppState();
   const dispatch = useAppDispatch();
   const t = useT();
-  const { stage, answer, chosenSize } = state.xsGate;
-  const isChoose = stage === "choose";
-  const content = isChoose ? XS_GATE_CHOOSE : XS_GATE_ASK;
+  const { subStep, answers } = state.xsGate;
+  const sub = XS_GATE_SUBQUESTIONS[subStep];
+  const answer = answers[sub.key];
 
   return (
     <>
-      <div className="m-step-label">{t(content.shortLabel)}</div>
-      <h1 className="m-q-title">{t(content.title)}</h1>
-      <p className="m-q-subtitle">{t(content.subtitle)}</p>
+      <div className="m-step-label">{t(sub.shortLabel)}</div>
+      <h1 className="m-q-title">{t(sub.question)}</h1>
 
       <div className="m-options">
-        {!isChoose &&
-          XS_GATE_ASK.options.map((opt) => {
-            const selected = answer === opt.id;
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                className={`m-option-card ${selected ? "selected" : ""}`}
-                onClick={() => dispatch({ type: "XSGATE_SELECT_ANSWER", value: opt.id })}
-              >
-                <div className="m-option-text">
-                  <span className="m-option-title">{t(opt.label)}</span>
-                  <span className="m-option-sub">{t(opt.sublabel)}</span>
-                </div>
-                <div className={`m-option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>
-              </button>
-            );
-          })}
-        {isChoose &&
-          gridSizeOptions()
-            .filter((g) => g !== "XS")
-            .map((g) => {
-              const selected = chosenSize === g;
-              const suggested = XS_GATE_SUGGESTED.includes(g);
-              return (
-                <button key={g} type="button" className={`m-option-card ${selected ? "selected" : ""}`} onClick={() => dispatch({ type: "XSGATE_SELECT_SIZE", gridSize: g })}>
-                  <div className="m-option-text">
-                    <span className="m-option-title">
-                      {t(g)}
-                      {suggested && <span className="option-suggested-badge">{t("Suggested")}</span>}
-                    </span>
-                  </div>
-                  <div className={`m-option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>
-                </button>
-              );
-            })}
+        {["yes", "no"].map((val) => {
+          const selected = answer === val;
+          return (
+            <button
+              key={val}
+              type="button"
+              className={`m-option-card ${selected ? "selected" : ""}`}
+              onClick={() => dispatch({ type: "XSGATE_ANSWER_SUB", value: val })}
+            >
+              <div className="m-option-text">
+                <span className="m-option-title">{t(val === "yes" ? "Yes" : "No")}</span>
+              </div>
+              <div className={`m-option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>
+            </button>
+          );
+        })}
       </div>
+
+      {answer === "yes" && (
+        <div className="m-xsgate-advisory">
+          <p style={{ margin: "0 0 4px" }}>{t(sub.yesAdvisory)}</p>
+          <Citation citation={sub.citation} />
+        </div>
+      )}
     </>
   );
 }

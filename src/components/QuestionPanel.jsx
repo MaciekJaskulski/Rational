@@ -1,8 +1,8 @@
 import { STEPS } from "../data/steps";
 import { useAppState, useAppDispatch, useT } from "../state/store";
-import { gridSizeOptions } from "../data/engine";
-import { XS_GATE_ASK, XS_GATE_CHOOSE, XS_GATE_SUGGESTED } from "../data/xsGate";
+import { XS_GATE_SUBQUESTIONS, xsGateAnyYes } from "../data/xsGate";
 import ChatPanel from "./ChatPanel";
+import Citation from "./chat/Citation";
 
 function canContinue(state) {
   const step = state.currentStep;
@@ -13,77 +13,67 @@ function canContinue(state) {
   return true;
 }
 
-// XS's add-on gate ("Step 1a") — a real inserted guided-selling step, not a
-// chat aside. `ask` checks whether the fat drain / core probe / lockable
-// panel matter at all; `choose` (only reached on "yes") lets the user pick
-// any non-XS size, with the two smallest ones marked as the suggested step-up.
+// XS's add-on subflow ("Step 1a/1b/1c") — three real inserted guided-selling
+// questions, one per feature the XS skips (fat drain / core probe / lockable
+// panel), not a chat aside. Each is a plain yes/no; "yes" shows an inline
+// advisory recommending a bigger size, but never forces the switch — once
+// ANY answer is "yes" the Back button becomes "Pick a different oven", which
+// routes back to Step 1's own meal-volume question so the user picks a
+// different size themselves. Continuing through with XS regardless is fine.
 function XsGatePanel() {
   const state = useAppState();
   const dispatch = useAppDispatch();
   const t = useT();
-  const { stage, answer, chosenSize } = state.xsGate;
-  const isChoose = stage === "choose";
-  const content = isChoose ? XS_GATE_CHOOSE : XS_GATE_ASK;
-  const continueEnabled = isChoose ? !!chosenSize : !!answer;
+  const { subStep, answers } = state.xsGate;
+  const sub = XS_GATE_SUBQUESTIONS[subStep];
+  const answer = answers[sub.key];
+  const anyYes = xsGateAnyYes(answers);
   const chatLog = state.chatByStep.meals || [];
 
   return (
     <div className="question-panel">
-      <div className="step-label">{t(content.stepLabel)}</div>
+      <div className="step-label">{t(sub.stepLabel)}</div>
       <div className="body-chat">
         <div className="q-body">
-          <h1 className="q-title">{t(content.title)}</h1>
-          <p className="q-subtitle">{t(content.subtitle)}</p>
+          <h1 className="q-title">{t(sub.question)}</h1>
 
           <div className="q-options">
-            {!isChoose &&
-              XS_GATE_ASK.options.map((opt) => {
-                const selected = answer === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    className={`option-card ${selected ? "selected" : ""}`}
-                    onClick={() => dispatch({ type: "XSGATE_SELECT_ANSWER", value: opt.id })}
-                  >
-                    <div className="option-text">
-                      <span className="option-title">{t(opt.label)}</span>
-                      <span className="option-sub">{t(opt.sublabel)}</span>
-                    </div>
-                    <div className={`option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>
-                  </button>
-                );
-              })}
-            {isChoose &&
-              gridSizeOptions()
-                .filter((g) => g !== "XS")
-                .map((g) => {
-                  const selected = chosenSize === g;
-                  const suggested = XS_GATE_SUGGESTED.includes(g);
-                  return (
-                    <button
-                      key={g}
-                      type="button"
-                      className={`option-card ${selected ? "selected" : ""}`}
-                      onClick={() => dispatch({ type: "XSGATE_SELECT_SIZE", gridSize: g })}
-                    >
-                      <div className="option-text">
-                        <span className="option-title">
-                          {t(g)}
-                          {suggested && <span className="option-suggested-badge">{t("Suggested")}</span>}
-                        </span>
-                      </div>
-                      <div className={`option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>
-                    </button>
-                  );
-                })}
+            {["yes", "no"].map((val) => {
+              const selected = answer === val;
+              return (
+                <button
+                  key={val}
+                  type="button"
+                  className={`option-card ${selected ? "selected" : ""}`}
+                  onClick={() => dispatch({ type: "XSGATE_ANSWER_SUB", value: val })}
+                >
+                  <div className="option-text">
+                    <span className="option-title">{t(val === "yes" ? "Yes" : "No")}</span>
+                  </div>
+                  <div className={`option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>
+                </button>
+              );
+            })}
           </div>
 
+          {answer === "yes" && (
+            <div className="xsgate-advisory">
+              <p>{t(sub.yesAdvisory)}</p>
+              <Citation citation={sub.citation} />
+            </div>
+          )}
+
           <div className="step-nav">
-            <button className="btn btn-back" type="button" onClick={() => dispatch({ type: "XSGATE_BACK" })}>
-              {t("Back")}
-            </button>
-            <button className="btn btn-primary" type="button" onClick={() => dispatch({ type: "XSGATE_CONTINUE" })} disabled={!continueEnabled}>
+            {anyYes ? (
+              <button className="btn btn-back" type="button" onClick={() => dispatch({ type: "XSGATE_RESTART" })}>
+                {t("Pick a different oven (recommended)")}
+              </button>
+            ) : (
+              <button className="btn btn-back" type="button" onClick={() => dispatch({ type: "XSGATE_BACK" })}>
+                {t("Back")}
+              </button>
+            )}
+            <button className="btn btn-primary" type="button" onClick={() => dispatch({ type: "XSGATE_CONTINUE" })} disabled={!answer}>
               {t("Continue →")}
             </button>
           </div>

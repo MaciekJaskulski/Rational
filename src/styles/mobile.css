@@ -382,6 +382,16 @@
   font-size: 13px;
   color: #ffd7d7;
 }
+.m-xsgate-advisory {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(140, 43, 43, 0.25);
+  border: 1px solid rgba(217, 154, 154, 0.4);
+  font-size: 13px;
+  color: #fff;
+  line-height: 1.4;
+}
 
 .m-chips {
   display: flex;

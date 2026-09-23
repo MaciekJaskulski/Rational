@@ -2,7 +2,7 @@ import { useState, useRef, useLayoutEffect, useEffect } from "react";
 import { STEPS } from "../../data/steps";
 import { useAppState, useAppDispatch, useRecommendation, useT } from "../../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../../data/engine";
-import { XS_GATE_ASK, XS_GATE_CHOOSE, XS_GATE_SUGGESTED } from "../../data/xsGate";
+import { XS_GATE_SUBQUESTIONS, xsGateAnyYes } from "../../data/xsGate";
 import StreamedText from "../chat/StreamedText";
 import resolveAction from "../chat/resolveAction";
 import Citation from "../chat/Citation";
@@ -39,17 +39,20 @@ function useConversationBlocks() {
       if (isCurrent && !answered) {
         synthetic = { text: t(step.title), suggestions: step.options.map((o) => ({ q: t(o.label), action: `select:${step.id}:${o.id}` })) };
       } else if (isCurrent && step.key === "meals" && state.xsGate.active) {
-        // XS add-on gate ("Step 1a") — same two-stage question as the
-        // desktop/guided-tab panel, rendered here as chat chips instead of
-        // option cards, matching how every other guided step looks in chat.
-        const isChoose = state.xsGate.stage === "choose";
-        const content = isChoose ? XS_GATE_CHOOSE : XS_GATE_ASK;
-        const suggestions = isChoose
-          ? gridSizeOptions()
-              .filter((g) => g !== "XS")
-              .map((g) => ({ q: XS_GATE_SUGGESTED.includes(g) ? `${t(g)} ★ ${t("Suggested")}` : t(g), action: `xsgate:size:${g}` }))
-          : XS_GATE_ASK.options.map((o) => ({ q: t(o.label), action: `xsgate:answer:${o.id}` }));
-        synthetic = { text: t(content.title), suggestions };
+        // XS add-on subflow ("Step 1a/1b/1c") — same 3-question sequence as
+        // the desktop/guided-tab panel, rendered here as chat chips instead
+        // of option cards. Zoe's proactive explanation for the current
+        // sub-question is a real (persisted) chat entry pushed by the
+        // reducer, not part of this synthetic block.
+        const sub = XS_GATE_SUBQUESTIONS[state.xsGate.subStep];
+        const suggestions = [
+          { q: t("Yes"), action: "xsgate:answer:yes" },
+          { q: t("No"), action: "xsgate:answer:no" },
+        ];
+        if (xsGateAnyYes(state.xsGate.answers)) {
+          suggestions.push({ q: t("Pick a different oven (recommended)"), action: "xsgate:restart" });
+        }
+        synthetic = { text: t(sub.question), suggestions };
       }
       blocks.push({ key: step.key, entries, synthetic });
     } else if (step.subQuestions) {
@@ -283,8 +286,11 @@ export default function MobileChatTab() {
       return;
     }
     if (kind === "xsgate") {
-      if (a === "answer") dispatch({ type: "XSGATE_SELECT_ANSWER", value: b });
-      if (a === "size") dispatch({ type: "XSGATE_SELECT_SIZE", gridSize: b });
+      if (a === "restart") {
+        dispatch({ type: "XSGATE_RESTART" });
+        return;
+      }
+      dispatch({ type: "XSGATE_ANSWER_SUB", value: b });
       dispatch({ type: "XSGATE_CONTINUE" });
       return;
     }

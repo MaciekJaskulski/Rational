@@ -4,10 +4,26 @@ import { findOption, computeRecommendation } from "../data/engine";
 import { inferFromText } from "../data/nlu";
 import { matchSupportTopic, isCompareQuery, buildComparison, supportFollowUps, PRO_VS_CLASSIC, SUPPORT_TOPICS } from "../data/knowledge";
 import { translate } from "../i18n/dictionary";
-import { freeTextRecapMessage, upsizeMessage, whyMessage, xsGateSwitchText } from "../i18n/messages";
-import { XS_GATE_ASK, XS_GATE_CITATION, XS_GATE_STAY_TEXT } from "../data/xsGate";
+import { freeTextRecapMessage, upsizeMessage, whyMessage } from "../i18n/messages";
+import { XS_GATE_SUBQUESTIONS, XS_GATE_INTRO_TEXT } from "../data/xsGate";
 
 const STEP4 = STEPS[3];
+
+// Decorative fallback for the XS gate's Zoe-suggested chips — these are
+// context chips ("What if I mostly do vegetables?" etc.), not questions with
+// authored answers, so tapping one gets the same generic deferral ASK_ANYTHING
+// falls back to for anything unmatched.
+const GENERIC_DEFERRAL =
+  "Good question — a Rational advisor can go deeper on that once you send this through, but broadly: it depends on your exact setup. Try one of the suggested questions above for a sharper answer.";
+
+function pushXsGateSubQuestionChat(chatByStep, subIndex) {
+  const sub = XS_GATE_SUBQUESTIONS[subIndex];
+  return pushChat(chatByStep, "meals", {
+    type: "fact",
+    text: sub.zoeText,
+    suggestions: sub.suggestions.map((q) => ({ q, a: GENERIC_DEFERRAL })),
+  });
+}
 
 function initialState() {
   return {
@@ -36,13 +52,15 @@ function initialState() {
     // Gates leaving Step 1 whenever XS is picked — the XS skips three
     // accessories (integrated fat drain, externally attachable core probe,
     // lockable control panel) the rest of the line has, so this is a real
-    // inserted guided-selling step ("1a"), not a chat aside.
+    // inserted 3-question guided-selling subflow ("1a"/"1b"/"1c"), not a
+    // chat aside. No answer here forces a switch — "yes" just recommends
+    // going back to pick a bigger size; the user can still Continue through
+    // with XS.
     xsGate: {
       active: false,
-      resolved: false, // true once answered once — never re-triggers after that
-      stage: null, // 'ask' | 'choose'
-      answer: null, // pending 'no' | 'yes' selection at the 'ask' stage
-      chosenSize: null, // pending gridSize selection at the 'choose' stage
+      resolved: false, // true once the subflow has been completed once — never re-triggers after that
+      subStep: 0, // 0..XS_GATE_SUBQUESTIONS.length-1
+      answers: { fatDrain: null, coreProbe: null, lockPanel: null }, // pending 'yes' | 'no' per sub-question
     },
   };
 }
@@ -81,12 +99,9 @@ function advanceToNextStep(state) {
   // the XS add-on gate instead of moving on. Once xsGate.resolved is true
   // (either answer), this never fires again for the rest of the session.
   if (state.currentStep === 1 && state.answers.meals === "xs" && !state.xsGate.resolved && !state.xsGate.active) {
-    const chatByStep = pushChat(state.chatByStep, "meals", {
-      type: "fact",
-      text: XS_GATE_ASK.subtitle,
-      citation: XS_GATE_CITATION,
-    });
-    return { ...state, chatByStep, xsGate: { ...state.xsGate, active: true, stage: "ask" } };
+    let chatByStep = pushChat(state.chatByStep, "meals", { type: "transition", text: XS_GATE_INTRO_TEXT });
+    chatByStep = pushXsGateSubQuestionChat(chatByStep, 0);
+    return { ...state, chatByStep, xsGate: { ...state.xsGate, active: true, subStep: 0 } };
   }
   const nextStep = state.currentStep + 1;
   if (nextStep > 4) {
@@ -341,51 +356,51 @@ function reducer(state, action) {
     case "PATHC_UNLOCK_VENTILATION":
       return { ...state, pathC: { ...state.pathC, ventilationUnlocked: true } };
 
-    case "XSGATE_SELECT_ANSWER":
-      return { ...state, xsGate: { ...state.xsGate, answer: action.value } };
-
-    case "XSGATE_SELECT_SIZE":
-      return { ...state, xsGate: { ...state.xsGate, chosenSize: action.gridSize } };
+    case "XSGATE_ANSWER_SUB": {
+      const sub = XS_GATE_SUBQUESTIONS[state.xsGate.subStep];
+      return { ...state, xsGate: { ...state.xsGate, answers: { ...state.xsGate.answers, [sub.key]: action.value } } };
+    }
 
     case "XSGATE_CONTINUE": {
-      if (state.xsGate.stage === "ask") {
-        if (state.xsGate.answer === "yes") {
-          return { ...state, xsGate: { ...state.xsGate, stage: "choose" } };
-        }
-        if (state.xsGate.answer === "no") {
-          const chatByStep = pushChat(state.chatByStep, "meals", { type: "assistant", text: XS_GATE_STAY_TEXT });
-          return advanceToNextStep({
-            ...state,
-            chatByStep,
-            xsGate: { active: false, resolved: true, stage: null, answer: "no", chosenSize: null },
-          });
-        }
-        return state; // no pending answer yet — Continue stays disabled in the UI for this
+      const sub = XS_GATE_SUBQUESTIONS[state.xsGate.subStep];
+      const answer = state.xsGate.answers[sub.key];
+      if (!answer) return state; // no pending answer — Continue stays disabled in the UI
+      // A "yes" answer's advisory is guided-flow content (shown inline on
+      // the panel) but also recorded in chat here — once, centrally — so
+      // the mobile chat surface (which has no separate panel) still carries
+      // it, and it's on record if anyone switches to "Talk about it" later.
+      let chatByStep = state.chatByStep;
+      if (answer === "yes") {
+        chatByStep = pushChat(chatByStep, "meals", { type: "assistant", text: sub.yesAdvisory, citation: sub.citation });
       }
-      if (state.xsGate.stage === "choose") {
-        const gridSize = state.xsGate.chosenSize;
-        if (!gridSize) return state;
-        const overrides = { ...state.overrides, gridSize };
-        const chatByStep = pushChat(state.chatByStep, "meals", {
-          type: "assistant",
-          text: xsGateSwitchText(state.lang, gridSize),
-          citation: XS_GATE_CITATION,
-        });
-        return advanceToNextStep({
-          ...state,
-          overrides,
-          chatByStep,
-          xsGate: { active: false, resolved: true, stage: null, answer: "yes", chosenSize: null },
-        });
+      const isLast = state.xsGate.subStep === XS_GATE_SUBQUESTIONS.length - 1;
+      if (!isLast) {
+        const nextStep = state.xsGate.subStep + 1;
+        chatByStep = pushXsGateSubQuestionChat(chatByStep, nextStep);
+        return { ...state, chatByStep, xsGate: { ...state.xsGate, subStep: nextStep } };
       }
-      return state;
+      // Last sub-question answered — no answer here ever forces a switch, it
+      // only ever recommended "pick a different oven"; Continuing here means
+      // the user chose to stick with XS regardless.
+      return advanceToNextStep({ ...state, chatByStep, xsGate: { ...state.xsGate, active: false, resolved: true } });
     }
 
     case "XSGATE_BACK": {
-      if (state.xsGate.stage === "choose") {
-        return { ...state, xsGate: { ...state.xsGate, stage: "ask", chosenSize: null } };
+      if (state.xsGate.subStep > 0) {
+        return { ...state, xsGate: { ...state.xsGate, subStep: state.xsGate.subStep - 1 } };
       }
-      return { ...state, xsGate: { active: false, resolved: false, stage: null, answer: null, chosenSize: null } };
+      return { ...state, xsGate: { active: false, resolved: false, subStep: 0, answers: { fatDrain: null, coreProbe: null, lockPanel: null } } };
+    }
+
+    case "XSGATE_RESTART": {
+      // "Pick a different oven" — only surfaced once a sub-answer is "yes".
+      // Resets all the way back to Step 1's own meal-volume question so the
+      // user picks a different size themselves through the normal flow.
+      return {
+        ...state,
+        answers: { ...state.answers, meals: null },
+        xsGate: { active: false, resolved: false, subStep: 0, answers: { fatDrain: null, coreProbe: null, lockPanel: null } },
+      };
     }
 
     case "SET_MOBILE_TAB":

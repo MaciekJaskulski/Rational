@@ -17,6 +17,8 @@ export const DE = {
   REFINE: "VERFEINERN",
   SUMMARY: "ZUSAMMENFASSUNG",
   Restart: "Neu starten",
+  MVP: "MVP",
+  V2: "V2",
 
   // ---- Step 1 — Meals & Volume ----
   "STEP 1 OF 6 — MEALS & VOLUME": "SCHRITT 1 VON 6 — MAHLZEITEN & VOLUMEN",

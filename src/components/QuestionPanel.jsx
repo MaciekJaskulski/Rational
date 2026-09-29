@@ -29,9 +29,10 @@ function XsGatePanel() {
   const answer = answers[sub.key];
   const anyYes = xsGateAnyYes(answers);
   const chatLog = state.chatByStep.meals || [];
+  const showChat = state.viewMode === "extended";
 
   return (
-    <div className="question-panel">
+    <div className={`question-panel ${showChat ? "" : "no-chat"}`}>
       <div className="step-label">{t(sub.stepLabel)}</div>
       <div className="body-chat">
         <div className="q-body">
@@ -79,7 +80,9 @@ function XsGatePanel() {
           </div>
         </div>
 
-        <ChatPanel stepKey="meals" chatLog={chatLog} onAskAnything={(text) => dispatch({ type: "ASK_ANYTHING", stepKey: "meals", text })} freeTextMode={false} />
+        {showChat && (
+          <ChatPanel stepKey="meals" chatLog={chatLog} onAskAnything={(text) => dispatch({ type: "ASK_ANYTHING", stepKey: "meals", text })} freeTextMode={false} />
+        )}
       </div>
     </div>
   );
@@ -95,8 +98,9 @@ export default function QuestionPanel() {
   const step = STEPS.find((s) => s.id === state.currentStep);
   const stepKey = step.key;
   const chatLog = state.chatByStep[stepKey] || [];
+  const showChat = state.viewMode === "extended";
 
-  const freeTextMode = stepKey === "meals" && !state.answers.meals && !state.pathC.active;
+  const freeTextMode = showChat && stepKey === "meals" && !state.answers.meals && !state.pathC.active;
   const isFirstStep = state.currentStep === 1 && !state.pathC.active;
   const continueEnabled = canContinue(state);
 
@@ -113,7 +117,7 @@ export default function QuestionPanel() {
   }
 
   return (
-    <div className="question-panel">
+    <div className={`question-panel ${showChat ? "" : "no-chat"}`}>
       <div className="step-label">{t(step.stepLabel)}</div>
       <div className="body-chat">
         <div className="q-body">
@@ -182,7 +186,7 @@ export default function QuestionPanel() {
           </div>
         </div>
 
-        <ChatPanel stepKey={stepKey} chatLog={chatLog} onAskAnything={askAnything} freeTextMode={freeTextMode} />
+        {showChat && <ChatPanel stepKey={stepKey} chatLog={chatLog} onAskAnything={askAnything} freeTextMode={freeTextMode} />}
       </div>
     </div>
   );

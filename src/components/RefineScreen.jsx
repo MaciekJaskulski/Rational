@@ -9,6 +9,7 @@ export default function RefineScreen() {
   const rec = useRecommendation();
   const t = useT();
   const chatLog = state.chatByStep.refine || [];
+  const showChat = state.viewMode === "extended";
 
   useEffect(() => {
     dispatch({ type: "SEED_REFINE" });
@@ -25,7 +26,7 @@ export default function RefineScreen() {
 
   return (
     <div className="content-row">
-      <div className="refine-panel">
+      <div className={`refine-panel ${showChat ? "" : "no-chat"}`}>
         <div className="refine-controls">
           <div className="step-label">{t("STEP 5 OF 6 — REFINE")}</div>
           <h1 className="q-title" style={{ fontSize: 26 }}>
@@ -94,7 +95,7 @@ export default function RefineScreen() {
           </div>
         </div>
 
-        <ChatPanel stepKey="refine" chatLog={chatLog} onAskAnything={askAnything} />
+        {showChat && <ChatPanel stepKey="refine" chatLog={chatLog} onAskAnything={askAnything} />}
       </div>
     </div>
   );

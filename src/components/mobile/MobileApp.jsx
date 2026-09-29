@@ -13,7 +13,10 @@ import MobileBottomBar from "./MobileBottomBar";
 export default function MobileApp() {
   const state = useAppState();
   const dispatch = useAppDispatch();
-  const activeTab = state.mobileTab;
+  // In "mvp" mode the tabbar is hidden entirely, so the chat tab is never
+  // reachable — pin the effective tab to "guided" regardless of whatever
+  // state.mobileTab was left at (e.g. from a previous "extended" session).
+  const activeTab = state.viewMode === "extended" ? state.mobileTab : "guided";
   const setActiveTab = (tab) => dispatch({ type: "SET_MOBILE_TAB", tab });
 
   return (

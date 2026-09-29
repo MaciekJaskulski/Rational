@@ -65,6 +65,14 @@ export default function Header() {
       </div>
 
       <div className="header-right">
+        <div className="view-toggle">
+          <button className={state.viewMode === "mvp" ? "active" : ""} onClick={() => dispatch({ type: "SET_VIEW_MODE", mode: "mvp" })}>
+            {t("MVP")}
+          </button>
+          <button className={state.viewMode === "extended" ? "active" : ""} onClick={() => dispatch({ type: "SET_VIEW_MODE", mode: "extended" })}>
+            {t("V2")}
+          </button>
+        </div>
         <div className="lang-toggle" ref={langRef}>
           <button className="lang-btn" onClick={() => dispatch({ type: "TOGGLE_LANG_EXPAND" })}>
             {state.lang.toUpperCase()}

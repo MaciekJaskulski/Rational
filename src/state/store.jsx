@@ -36,6 +36,7 @@ function initialState() {
     overrides: {}, // { gridSize, rack, hood, stand }
     accessories: [], // [{id,label}]
     chatByStep: { meals: [{ type: "transition", text: STEPS[0].transition }] }, // stepKey -> [{type:'transition'|'fact'|'qa'|'user'|'assistant', ...}]
+    viewMode: "mvp", // "mvp" (no Zoe chat) | "extended" (Zoe chat alongside guided selling) — a display preference, survives RESTART like lang does
     tappedSuggestions: {}, // `${stepKey}:${optionId}` -> Set of indices tapped (serialized as array)
     productPreviewShown: false,
     checklistAdded: false,
@@ -172,7 +173,10 @@ function nudgeSuggestions(nudge) {
 function reducer(state, action) {
   switch (action.type) {
     case "RESTART":
-      return { ...initialState(), lang: state.lang };
+      return { ...initialState(), lang: state.lang, viewMode: state.viewMode };
+
+    case "SET_VIEW_MODE":
+      return { ...state, viewMode: action.mode };
 
     case "TOGGLE_LANG_EXPAND":
       return { ...state, langExpanded: !state.langExpanded };

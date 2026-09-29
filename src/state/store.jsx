@@ -6,6 +6,7 @@ import { matchSupportTopic, isCompareQuery, buildComparison, supportFollowUps, P
 import { translate } from "../i18n/dictionary";
 import { freeTextRecapMessage, upsizeMessage, whyMessage } from "../i18n/messages";
 import { XS_GATE_SUBQUESTIONS, XS_GATE_INTRO_TEXT, XS_GATE_FAT_DRAIN_CITATION, XS_GATE_FEATURES_PRESENT_TEXT, XS_GATE_FEATURES_ABSENT_TEXT } from "../data/xsGate";
+import { isDinerIntroOpener, isMeatQuestion, DINER_INTRO_SHORTLIST_TEXT, DINER_INTRO_SUGGESTIONS, DINER_INTRO_MEAT_ANSWER_TEXT } from "../data/dinerIntro";
 
 const STEP4 = STEPS[3];
 
@@ -15,6 +16,32 @@ const STEP4 = STEPS[3];
 // falls back to for anything unmatched.
 const GENERIC_DEFERRAL =
   "Good question — a Rational advisor can go deeper on that once you send this through, but broadly: it depends on your exact setup. Try one of the suggested questions above for a sharper answer.";
+
+// Picks a Step 1 (meals) product for real — same fact bubble, feature note,
+// citations, and suggestions a direct click on that option card produces —
+// as ONE chat bubble, never split across two pushChat calls. Two (or more)
+// messages landing in the same state update get scroll-pinned to the
+// newest one, leaving the earlier one(s) hidden above the fold; `intro`
+// (used by the diner-intro opener's auto-pick) folds an extra sentence in
+// as the bubble's lead line instead of a separate message. Shared by
+// SELECT_OPTION (a real click) and the diner-intro opener's two paths to
+// auto-picking "6-1" (chip tap, via resolveAction, and free-text, via
+// START_FREE_TEXT) so neither has to duplicate this.
+function pickMealsOption(state, optionId, intro) {
+  const option = STEPS[0].options.find((o) => o.id === optionId);
+  const answers = { ...state.answers, meals: optionId };
+  const featureNote = optionId === "xs" ? XS_GATE_FEATURES_ABSENT_TEXT : XS_GATE_FEATURES_PRESENT_TEXT;
+  const citation = [option.citation, XS_GATE_FAT_DRAIN_CITATION].filter(Boolean);
+  const chatByStep = pushChat(state.chatByStep, "meals", {
+    type: "fact",
+    optionId,
+    text: intro || option.factBubble,
+    appendPrompt: intro ? [option.factBubble, featureNote] : featureNote,
+    citation,
+    suggestions: option.suggestions,
+  });
+  return { answers, chatByStep, productPreviewShown: true };
+}
 
 function pushXsGateSubQuestionChat(chatByStep, subIndex) {
   const sub = XS_GATE_SUBQUESTIONS[subIndex];
@@ -171,6 +198,38 @@ function nudgeSuggestions(nudge) {
   ];
 }
 
+// Wraps a "ready to continue?" prompt so ChatPanel/MobileChatTab's
+// displayText renders it on its own line (a blank line before it, not just
+// a space) — every appendPrompt below that's actually a next-step nudge
+// should go through this, not a bare string, so the question always reads
+// as visually separate from whatever answer it's tacked onto.
+function nudgePiece(text) {
+  return { text, break: true };
+}
+
+// The diner-intro opener's product pick doubles as Path C's "confirm" —
+// there's no separate recap/confirm step for this opener, so the moment a
+// product is actually chosen (the meat question), this folds Step 1's own
+// "ready to continue?" nudge onto that SAME message (never a separate one —
+// same reasoning as pickMealsOption's `intro`) and switches Path C on, so
+// every question asked from here on (including free-text ones like "what's
+// the warranty for it?") already gets the standard nudge treatment with no
+// further special-casing needed.
+function activateDinerIntroNudge(state, picked) {
+  const list = [...picked.chatByStep.meals];
+  const lastIdx = list.length - 1;
+  const last = list[lastIdx];
+  const prompt = NEXT_STEP_PROMPTS[1];
+  const existing = last.appendPrompt;
+  const appendPrompt = Array.isArray(existing) ? [...existing, nudgePiece(prompt)] : existing ? [existing, nudgePiece(prompt)] : nudgePiece(prompt);
+  list[lastIdx] = { ...last, appendPrompt, suggestions: nudgeSuggestions({ prompt, yesAction: "pathc:advance" }) };
+  return {
+    ...picked,
+    chatByStep: { ...picked.chatByStep, meals: list },
+    pathC: { ...state.pathC, active: true, stage: "stepping" },
+  };
+}
+
 function reducer(state, action) {
   switch (action.type) {
     case "RESTART":
@@ -214,32 +273,33 @@ function reducer(state, action) {
     case "SELECT_OPTION": {
       const { stepId, optionId } = action;
       const stepKey = stepKeyFor(stepId);
+
+      if (stepKey === "meals") {
+        return { ...state, ...pickMealsOption(state, optionId) };
+      }
+
       const step = STEPS.find((s) => s.id === stepId);
       const option = step.options.find((o) => o.id === optionId);
       const answers = { ...state.answers, [stepKey]: optionId };
-      const productPreviewShown = state.productPreviewShown || stepKey === "meals";
-
-      // Fat drain / core probe / lockable panel — present on every size but
-      // the XS. Folded into the same fact bubble as an appendPrompt (not a
-      // separate message) so it's never scrolled out of view above a second
-      // bubble; each piece is translated independently and only joined at
-      // display time (see ChatPanel/MobileChatTab's displayText), same as
-      // every other appendPrompt use. Cited alongside the product's own
-      // datasheet via Citation's array support.
-      const featureNote = stepKey === "meals" ? (optionId === "xs" ? XS_GATE_FEATURES_ABSENT_TEXT : XS_GATE_FEATURES_PRESENT_TEXT) : null;
-      const citation = featureNote ? [option.citation, XS_GATE_FAT_DRAIN_CITATION].filter(Boolean) : option.citation || null;
-
       const chatByStep = pushChat(state.chatByStep, stepKey, {
         type: "fact",
         optionId,
         text: option.factBubble,
-        appendPrompt: featureNote,
-        citation,
+        citation: option.citation || null,
         suggestions: option.suggestions,
       });
 
-      return { ...state, answers, chatByStep, productPreviewShown };
+      return { ...state, answers, chatByStep };
     }
+
+    // Scenario B's diner-intro opener — "Which is better if I do a lot of
+    // meat?" chip tap. Picks "6-1" for real (same fact bubble, feature note,
+    // and citations as clicking the Step 1 card directly) with the
+    // fat-drain rationale AND the "ready to continue?" nudge folded into
+    // that same bubble — see pickMealsOption's `intro` and
+    // activateDinerIntroNudge.
+    case "DINERINTRO_PICK_61":
+      return { ...state, ...activateDinerIntroNudge(state, pickMealsOption(state, "6-1", DINER_INTRO_MEAT_ANSWER_TEXT)) };
 
     case "SELECT_SUBOPTION": {
       const { subKey, optionId } = action; // subKey: 'power' | 'ventilation'
@@ -277,16 +337,17 @@ function reducer(state, action) {
           type: "qa",
           q: s.q,
           a: s.a,
-          appendPrompt: nudge ? nudge.prompt : null,
+          appendPrompt: nudge ? nudgePiece(nudge.prompt) : null,
           citation: s.citation || null,
-          suggestions: nudge ? nudgeSuggestions(nudge) : s.topicId ? supportFollowUps(s.topicId) : null,
+          suggestions: nudge ? nudgeSuggestions(nudge) : s.suggestions || (s.topicId ? supportFollowUps(s.topicId) : null),
         });
         return { ...state, chatByStep: { ...state.chatByStep, [stepKey]: list } };
       }
 
-      // Support-topic suggestions chain into the OTHER topics, so browsing
-      // installation/warranty/service/support doesn't dead-end after one tap.
-      const followUps = s.topicId ? supportFollowUps(s.topicId) : null;
+      // A suggestion can carry its own curated follow-ups (s.suggestions);
+      // otherwise chain into the OTHER support topics (or, with no topicId
+      // either, all of them) so a plain question never just dead-ends.
+      const followUps = s.suggestions || supportFollowUps(s.topicId || null);
       list.push({ type: "qa", q: s.q, a: s.a, citation: s.citation || null, suggestions: followUps });
       return { ...state, chatByStep: { ...state.chatByStep, [stepKey]: list } };
     }
@@ -337,7 +398,7 @@ function reducer(state, action) {
         list.push({
           type: "assistant",
           text: answerText,
-          appendPrompt: NEXT_STEP_PROMPTS[1],
+          appendPrompt: nudgePiece(NEXT_STEP_PROMPTS[1]),
           citation,
           suggestions: [
             { q: "Yes, let's continue", a: null, action: "pathc:confirm" },
@@ -352,7 +413,7 @@ function reducer(state, action) {
         list.push({
           type: "assistant",
           text: answerText,
-          appendPrompt: nudge ? nudge.prompt : null,
+          appendPrompt: nudge ? nudgePiece(nudge.prompt) : null,
           citation,
           suggestions: nudge ? nudgeSuggestions(nudge) : matchedTopicId ? supportFollowUps(matchedTopicId) : null,
         });
@@ -492,7 +553,7 @@ function reducer(state, action) {
           chatByStep = pushChat(chatByStep, "refine", {
             type: "fact",
             text,
-            appendPrompt: nudge ? nudge.prompt : null,
+            appendPrompt: nudge ? nudgePiece(nudge.prompt) : null,
             suggestions: nudge ? nudgeSuggestions(nudge) : null,
           });
         } else {
@@ -549,6 +610,30 @@ function reducer(state, action) {
             suggestions: supportFollowUps(supportTopic.id),
           }),
         };
+      }
+
+      // Scenario B's scripted opener — shortlist two products instead of
+      // picking one immediately, so nothing gets pre-selected until the
+      // user actually asks which one suits them.
+      if (isDinerIntroOpener(text)) {
+        const chatByStep = pushChat(state.chatByStep, "meals", { type: "user", text });
+        return {
+          ...state,
+          chatByStep: pushChat(chatByStep, "meals", {
+            type: "assistant",
+            text: DINER_INTRO_SHORTLIST_TEXT,
+            suggestions: DINER_INTRO_SUGGESTIONS,
+          }),
+        };
+      }
+      // Same meat question as the diner-intro shortlist's own suggestion
+      // chip, just typed free-text instead of tapped — both end up picking
+      // "6-1" via pickMealsOption's `intro` (see DINERINTRO_PICK_61 for the
+      // chip-click path).
+      if (isMeatQuestion(text)) {
+        const chatByStep = pushChat(state.chatByStep, "meals", { type: "user", text });
+        const picked = pickMealsOption({ ...state, chatByStep }, "6-1", DINER_INTRO_MEAT_ANSWER_TEXT);
+        return { ...state, ...activateDinerIntroNudge(state, picked) };
       }
 
       const inference = inferFromText(text);

@@ -511,6 +511,25 @@ export const DE = {
   "That's perfect, send it →": "Perfekt, absenden →",
   "Ready to bring this all together?": "Bereit, das Ganze zusammenzuführen?",
   "Let me review my setup": "Ich möchte mein Setup überprüfen",
+
+  // ---- Demo Scenario B — diner-intro opener ----
+  "Great, let's pick the perfect oven for you. If you cook less than 100 meals per day, I'd recommend either the iCombi Pro XS or the iCombi Pro 6-Grid 1/1 GN.":
+    "Gut, dann finden wir das perfekte Gerät für Sie. Wenn Sie weniger als 100 Mahlzeiten pro Tag zubereiten, empfehle ich entweder das iCombi Pro XS oder das iCombi Pro 6-Grid 1/1 GN.",
+  "Can you compare them?": "Können Sie sie vergleichen?",
+  "They're closer than you'd think. Both run the same iCombi Pro intelligence — touchscreen controls, the iCookingSuite automated cooking assistant, ConnectedCooking connectivity, and RATIONAL's standard 2-year warranty and service program. Both are also compact, single-column units that sit on a standard countertop, so neither needs a full floor-standing footprint. The key difference: the XS is electric-only, and — unlike the 6-Grid 1/1 GN — it doesn't have the integrated fat drain, an externally attachable core temperature probe, or a lockable control panel. The XS is the smaller, more compact pick; the 6-Grid 1/1 GN is the same footprint family stepped up with those extra features, plus a gas option.":
+    "Näher beieinander, als man denkt. Beide laufen mit derselben iCombi Pro Intelligenz — Touchscreen-Bedienung, dem automatisierten Garassistenten iCookingSuite, ConnectedCooking-Anbindung und RATIONALs standardmäßiger 2-Jahres-Garantie samt Serviceprogramm. Beide sind außerdem kompakte Einzelgeräte, die auf eine normale Arbeitsplatte passen — keines der beiden braucht ein vollwertiges Standgerät. Der wichtigste Unterschied: Das XS gibt es nur elektrisch und hat — anders als das 6-Grid 1/1 GN — weder den integrierten Fettablauf noch einen extern anbringbaren Kerntemperaturfühler oder ein abschließbares Bedienfeld. Das XS ist die kleinere, kompaktere Wahl; das 6-Grid 1/1 GN ist dieselbe Baureihe, nur mit diesen zusätzlichen Funktionen und einer Gasoption.",
+  "Which one fits a smaller kitchen?": "Welches passt in eine kleinere Küche?",
+  "Both are compact, single-column units, but the XS is the smallest oven RATIONAL makes — it holds 2/3 GN pans instead of the 1/1 GN pans the rest of the line uses, so it's the pick for genuinely tight spaces.":
+    "Beide sind kompakte Einzelgeräte, aber das XS ist das kleinste Gerät, das RATIONAL herstellt — es fasst 2/3-GN-Behälter statt der 1/1-GN-Behälter des restlichen Sortiments und ist damit die Wahl für wirklich beengte Räume.",
+  "Do I lose anything else by picking the XS?": "Verliere ich noch etwas anderes, wenn ich mich für das XS entscheide?",
+  "Mainly capacity and those three features — pan size steps down to 2/3 GN, and it's electric-only. Otherwise it runs the same iCombi Pro intelligence as every other size.":
+    "Hauptsächlich Kapazität und diese drei Funktionen — die Behältergröße sinkt auf 2/3 GN, und es gibt es nur elektrisch. Ansonsten läuft es mit derselben iCombi Pro Intelligenz wie jede andere Größe.",
+  "Can you suggest something bigger?": "Können Sie etwas Größeres vorschlagen?",
+  "If the XS or 6-1/1 feels too small, the next steps up are the 6-Grid 2/1 GN for bigger batches at the same footprint, or the 10-Grid if you're running higher volume — tell me roughly how many meals a day and I can narrow it down.":
+    "Falls Ihnen XS oder 6-1/1 zu klein erscheinen, sind die nächsten Größen das 6-Grid 2/1 GN für größere Chargen bei gleicher Stellfläche oder das 10-Grid bei höherem Volumen — sagen Sie mir ungefähr, wie viele Mahlzeiten Sie pro Tag zubereiten, dann grenze ich es ein.",
+  "Which is better if I do a lot of meat?": "Was ist besser, wenn ich viel Fleisch zubereite?",
+  "For anything that puts off a lot of fat — think ribs, wings, whole chickens — the 6-Grid 1/1 GN pulls ahead thanks to its integrated fat drain, so grease gets carried straight out of the cooking chamber instead of building up.":
+    "Bei allem, was viel Fett abgibt — denken Sie an Rippchen, Flügel, ganze Hähnchen — hat das 6-Grid 1/1 GN dank des integrierten Fettablaufs die Nase vorn: Das Fett wird direkt aus dem Garraum abgeführt, statt sich anzusammeln.",
 };
 
 export function translate(text, lang) {

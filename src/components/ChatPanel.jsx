@@ -31,8 +31,25 @@ function Suggestions({ done, isLast, suggestions, onClick }) {
 // (e.g. "Yes — but are you ready to move on?") AFTER translating each piece
 // separately, since the two are stored untranslated and only concatenated
 // at display time — that's what lets a language switch retranslate history.
+// appendPrompt is usually a single trailing piece, but can be an array when
+// more than one extra piece needs to land in the SAME bubble (see
+// dinerIntro's merged meat-question answer). A piece is normally a plain
+// string (joined with a space); store.jsx's nudgePiece() wraps a "ready to
+// continue?"-style question as {text, break: true} instead, which joins on
+// its own line — the .chat-bubble/.m-bubble CSS needs white-space: pre-line
+// for that blank line to actually render instead of collapsing.
 function displayText(t, text, appendPrompt) {
-  return appendPrompt ? `${t(text)} ${t(appendPrompt)}` : t(text);
+  if (!appendPrompt) return t(text);
+  const parts = Array.isArray(appendPrompt) ? appendPrompt : [appendPrompt];
+  let result = t(text);
+  for (const part of parts) {
+    if (part && typeof part === "object") {
+      result += (part.break ? "\n\n" : " ") + t(part.text);
+    } else {
+      result += " " + t(part);
+    }
+  }
+  return result;
 }
 
 function QaEntry({ q, a, appendPrompt, citation, suggestions, isLast, onSuggestionClick }) {

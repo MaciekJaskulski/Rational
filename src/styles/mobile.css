@@ -572,6 +572,7 @@
   font-weight: 300;
   line-height: 1.5;
   color: #fff;
+  white-space: pre-line;
 }
 .m-bubble-transition {
   font-style: italic;

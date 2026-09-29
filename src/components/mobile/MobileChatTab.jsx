@@ -144,10 +144,21 @@ function MSuggestions({ done, show, suggestions, onClick }) {
   );
 }
 
-// See ChatPanel.jsx's identical helper — combines a message's text with its
-// optional trailing nudge prompt AFTER translating each piece separately.
+// See ChatPanel.jsx's identical helper — appendPrompt can be a single piece
+// or an array of pieces; a {text, break: true} piece (store.jsx's
+// nudgePiece()) joins on its own line instead of a plain space.
 function displayText(t, text, appendPrompt) {
-  return appendPrompt ? `${t(text)} ${t(appendPrompt)}` : t(text);
+  if (!appendPrompt) return t(text);
+  const parts = Array.isArray(appendPrompt) ? appendPrompt : [appendPrompt];
+  let result = t(text);
+  for (const part of parts) {
+    if (part && typeof part === "object") {
+      result += (part.break ? "\n\n" : " ") + t(part.text);
+    } else {
+      result += " " + t(part);
+    }
+  }
+  return result;
 }
 
 function MQaEntry({ q, a, appendPrompt, citation, suggestions, show, onSuggestionClick, onStreamDone }) {

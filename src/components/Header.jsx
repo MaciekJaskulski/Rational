@@ -16,11 +16,15 @@ export default function Header() {
   const dispatch = useAppDispatch();
   const t = useT();
   const langRef = useRef(null);
+  const viewRef = useRef(null);
 
   useEffect(() => {
     function onDocClick(e) {
       if (langRef.current && !langRef.current.contains(e.target)) {
         dispatch({ type: "CLOSE_LANG" });
+      }
+      if (viewRef.current && !viewRef.current.contains(e.target)) {
+        dispatch({ type: "CLOSE_VIEW_MENU" });
       }
     }
     document.addEventListener("mousedown", onDocClick);
@@ -31,7 +35,29 @@ export default function Header() {
 
   return (
     <div className="header glass">
-      <div className="logo">RATIONAL</div>
+      <div className="view-toggle" ref={viewRef}>
+        <button type="button" className="logo" onClick={() => dispatch({ type: "TOGGLE_VIEW_EXPAND" })}>
+          RATIONAL
+        </button>
+        <AnimatePresence>
+          {state.viewMenuExpanded && (
+            <motion.div
+              className="view-menu"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15 }}
+            >
+              <button className={state.viewMode === "mvp" ? "active" : ""} onClick={() => dispatch({ type: "SET_VIEW_MODE", mode: "mvp" })}>
+                {t("MVP")}
+              </button>
+              <button className={state.viewMode === "extended" ? "active" : ""} onClick={() => dispatch({ type: "SET_VIEW_MODE", mode: "extended" })}>
+                {t("V2")}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       <div className="step-indicator">
         {STEP_LABELS.map((label, idx) => {
@@ -65,14 +91,6 @@ export default function Header() {
       </div>
 
       <div className="header-right">
-        <div className="view-toggle">
-          <button className={state.viewMode === "mvp" ? "active" : ""} onClick={() => dispatch({ type: "SET_VIEW_MODE", mode: "mvp" })}>
-            {t("MVP")}
-          </button>
-          <button className={state.viewMode === "extended" ? "active" : ""} onClick={() => dispatch({ type: "SET_VIEW_MODE", mode: "extended" })}>
-            {t("V2")}
-          </button>
-        </div>
         <div className="lang-toggle" ref={langRef}>
           <button className="lang-btn" onClick={() => dispatch({ type: "TOGGLE_LANG_EXPAND" })}>
             {state.lang.toUpperCase()}

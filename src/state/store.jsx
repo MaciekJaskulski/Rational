@@ -32,6 +32,7 @@ function initialState() {
     furthestStep: 1,
     lang: "en",
     langExpanded: false,
+    viewMenuExpanded: false,
     answers: { meals: null, focus: null, footprint: null, power: null, ventilation: null },
     overrides: {}, // { gridSize, rack, hood, stand }
     accessories: [], // [{id,label}]
@@ -176,7 +177,13 @@ function reducer(state, action) {
       return { ...initialState(), lang: state.lang, viewMode: state.viewMode };
 
     case "SET_VIEW_MODE":
-      return { ...state, viewMode: action.mode };
+      return { ...state, viewMode: action.mode, viewMenuExpanded: false };
+
+    case "TOGGLE_VIEW_EXPAND":
+      return { ...state, viewMenuExpanded: !state.viewMenuExpanded };
+
+    case "CLOSE_VIEW_MENU":
+      return state.viewMenuExpanded ? { ...state, viewMenuExpanded: false } : state;
 
     case "TOGGLE_LANG_EXPAND":
       return { ...state, langExpanded: !state.langExpanded };

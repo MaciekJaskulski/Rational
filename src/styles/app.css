@@ -84,11 +84,52 @@ button {
   flex-shrink: 0;
 }
 
+.header .view-toggle {
+  position: relative;
+}
 .header .logo {
+  background: none;
+  border: none;
   font-weight: 700;
   font-size: 18px;
   letter-spacing: 0.5px;
   color: var(--color-text);
+  padding: 0;
+}
+.header .logo:hover {
+  color: var(--color-brand-hover);
+}
+.view-menu {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  background: rgba(30, 30, 30, 0.95);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  min-width: 90px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 20;
+}
+.view-menu button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: 5px;
+}
+.view-menu button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.view-menu button.active {
+  color: var(--color-brand);
+  font-weight: 700;
 }
 
 .step-indicator {
@@ -164,32 +205,6 @@ button {
   gap: 16px;
   font-size: 13px;
   color: var(--color-text-muted-85);
-}
-
-.view-toggle {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 999px;
-  padding: 3px;
-}
-.view-toggle button {
-  background: none;
-  border: none;
-  color: var(--color-text-muted-85);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 999px;
-}
-.view-toggle button:hover {
-  color: #fff;
-}
-.view-toggle button.active {
-  background: var(--color-brand-active);
-  color: #fff;
 }
 
 .lang-toggle {

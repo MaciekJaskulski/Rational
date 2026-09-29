@@ -27,6 +27,10 @@ export const DE = {
     "Wählen Sie das Gerät, das am besten zur Anzahl der Mahlzeiten passt, die Sie pro Tag zubereiten.",
   "Hi, I'm Zoe — I'll help you find the right RATIONAL combi oven for your kitchen. You can click through the questions on the left, or just tell me about your kitchen here and I'll get you started. Either way, I'll explain the 'why' behind every recommendation, and you can ask me anything along the way — specs, installation, warranty, whatever you need.":
     "Hallo, ich bin Zoe — ich helfe Ihnen, den richtigen RATIONAL Combi-Dämpfer für Ihre Küche zu finden. Sie können sich links durch die Fragen klicken oder mir hier einfach von Ihrer Küche erzählen, dann lege ich direkt los. So oder so erkläre ich Ihnen immer das „Warum“ hinter jeder Empfehlung, und Sie können mich jederzeit alles fragen — Spezifikationen, Installation, Garantie, was auch immer Sie brauchen.",
+  "This size also comes with the integrated fat drain, an externally attachable core temperature probe, and a lockable control panel.":
+    "Diese Größe verfügt außerdem über den integrierten Fettablauf, einen extern anbringbaren Kerntemperaturfühler und ein abschließbares Bedienfeld.",
+  "One thing to flag: unlike the rest of the iCombi Pro line, the XS doesn't have the integrated fat drain, an externally attachable core temperature probe, or a lockable control panel.":
+    "Ein Hinweis: Im Gegensatz zum Rest der iCombi Pro Reihe hat das XS keinen integrierten Fettablauf, keinen extern anbringbaren Kerntemperaturfühler und kein abschließbares Bedienfeld.",
 
   "20–80 meals": "20–80 Mahlzeiten",
   "Very tight kitchen, compact batches": "Sehr beengte Küche, kompakte Chargen",

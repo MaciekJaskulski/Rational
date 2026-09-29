@@ -23,6 +23,15 @@ export const XS_GATE_ELECTRIC_ONLY_CITATION = {
   url: "https://www.webstaurantstore.com/documents/specsheets/pro_xs.pdf",
 };
 
+// Shown as a follow-up chat message right after a Step 1 product's fact
+// bubble, so the fat drain / core probe / lockable panel gap (or lack of
+// one) is surfaced immediately when the product is picked, not just buried
+// inside the XS gate subflow later.
+export const XS_GATE_FEATURES_PRESENT_TEXT =
+  "This size also comes with the integrated fat drain, an externally attachable core temperature probe, and a lockable control panel.";
+export const XS_GATE_FEATURES_ABSENT_TEXT =
+  "One thing to flag: unlike the rest of the iCombi Pro line, the XS doesn't have the integrated fat drain, an externally attachable core temperature probe, or a lockable control panel.";
+
 export const XS_GATE_INTRO_TEXT = "That's a great choice for a smaller volume, let's make sure it's suitable.";
 
 // One entry per sub-question, in order — `key` matches the field in

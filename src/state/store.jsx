@@ -5,7 +5,7 @@ import { inferFromText } from "../data/nlu";
 import { matchSupportTopic, isCompareQuery, buildComparison, supportFollowUps, PRO_VS_CLASSIC, SUPPORT_TOPICS } from "../data/knowledge";
 import { translate } from "../i18n/dictionary";
 import { freeTextRecapMessage, upsizeMessage, whyMessage } from "../i18n/messages";
-import { XS_GATE_SUBQUESTIONS, XS_GATE_INTRO_TEXT } from "../data/xsGate";
+import { XS_GATE_SUBQUESTIONS, XS_GATE_INTRO_TEXT, XS_GATE_FAT_DRAIN_CITATION, XS_GATE_FEATURES_PRESENT_TEXT, XS_GATE_FEATURES_ABSENT_TEXT } from "../data/xsGate";
 
 const STEP4 = STEPS[3];
 
@@ -219,11 +219,22 @@ function reducer(state, action) {
       const answers = { ...state.answers, [stepKey]: optionId };
       const productPreviewShown = state.productPreviewShown || stepKey === "meals";
 
-      let chatByStep = pushChat(state.chatByStep, stepKey, {
+      // Fat drain / core probe / lockable panel — present on every size but
+      // the XS. Folded into the same fact bubble as an appendPrompt (not a
+      // separate message) so it's never scrolled out of view above a second
+      // bubble; each piece is translated independently and only joined at
+      // display time (see ChatPanel/MobileChatTab's displayText), same as
+      // every other appendPrompt use. Cited alongside the product's own
+      // datasheet via Citation's array support.
+      const featureNote = stepKey === "meals" ? (optionId === "xs" ? XS_GATE_FEATURES_ABSENT_TEXT : XS_GATE_FEATURES_PRESENT_TEXT) : null;
+      const citation = featureNote ? [option.citation, XS_GATE_FAT_DRAIN_CITATION].filter(Boolean) : option.citation || null;
+
+      const chatByStep = pushChat(state.chatByStep, stepKey, {
         type: "fact",
         optionId,
         text: option.factBubble,
-        citation: option.citation || null,
+        appendPrompt: featureNote,
+        citation,
         suggestions: option.suggestions,
       });
 

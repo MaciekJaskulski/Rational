@@ -21,13 +21,12 @@ function Screen() {
         {state.screen === "guided" && (
           <div className="content-row">
             <QuestionPanel />
+            <ProductPreview />
           </div>
         )}
         {state.screen === "refine" && <RefineScreen />}
         {state.screen === "summary" && <SummaryScreen />}
 
-        {state.screen === "guided" && <ProductPreview />}
-        {state.screen === "refine" && <ProductPreview variant="refine" force />}
         <BottomBar />
       </div>
     </div>

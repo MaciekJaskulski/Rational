@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useAppState, useAppDispatch, useRecommendation, useT } from "../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../data/engine";
 import ChatPanel from "./ChatPanel";
+import ProductPreview from "./ProductPreview";
 
 export default function RefineScreen() {
   const state = useAppState();
@@ -97,6 +98,8 @@ export default function RefineScreen() {
 
         {showChat && <ChatPanel stepKey="refine" chatLog={chatLog} onAskAnything={askAnything} />}
       </div>
+
+      <ProductPreview variant="refine" force />
     </div>
   );
 }

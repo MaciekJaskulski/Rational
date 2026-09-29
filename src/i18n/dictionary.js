@@ -447,6 +447,15 @@ export const DE = {
   "Is it easy to accidentally change settings on the panel?": "Kann man am Bedienfeld leicht versehentlich Einstellungen ändern?",
   "This oven doesn't have a lockable panel so anyone will be able to change its settings, and we advise selecting iCombi 6 1/1 that has that feature.":
     "Dieses Gerät hat kein abschließbares Bedienfeld, sodass jeder die Einstellungen ändern kann — wir empfehlen das iCombi 6 1/1, das diese Funktion bietet.",
+
+  "STEP 1d OF 6 — POWER SUPPLY": "SCHRITT 1d VON 6 — STROMVERSORGUNG",
+  "Will the oven need to run on gas rather than electricity?": "Muss das Gerät mit Gas statt mit Strom betrieben werden?",
+  "The XS is electric-only — RATIONAL doesn't make a gas version at this size. If your kitchen's install site only has a gas hookup, or you specifically need a gas unit, you'd need to size up.":
+    "Das XS gibt es nur elektrisch — RATIONAL bietet in dieser Größe keine Gasversion an. Wenn an Ihrem Installationsort nur ein Gasanschluss vorhanden ist oder Sie gezielt ein Gasgerät benötigen, müssten Sie eine größere Größe wählen.",
+  "Can I add an electric line instead?": "Kann ich stattdessen eine Stromleitung legen lassen?",
+  "Which sizes offer a gas version?": "Welche Größen gibt es mit Gasversion?",
+  "This oven is electric-only, so it can't run on gas, and we advise selecting iCombi 6 1/1, which is available in both electric and gas versions.":
+    "Dieses Gerät gibt es nur elektrisch, es kann also nicht mit Gas betrieben werden — wir empfehlen das iCombi 6 1/1, das sowohl elektrisch als auch mit Gas erhältlich ist.",
   gas: "Gas",
   electric: "Elektrisch",
   "power TBD": "Stromanschluss offen",

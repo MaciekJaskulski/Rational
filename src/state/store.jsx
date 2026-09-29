@@ -62,7 +62,7 @@ function initialState() {
       active: false,
       resolved: false, // true once the subflow has been completed once — never re-triggers after that
       subStep: 0, // 0..XS_GATE_SUBQUESTIONS.length-1
-      answers: { fatDrain: null, coreProbe: null, lockPanel: null }, // pending 'yes' | 'no' per sub-question
+      answers: { fatDrain: null, coreProbe: null, lockPanel: null, gasPower: null }, // pending 'yes' | 'no' per sub-question
     },
   };
 }
@@ -400,7 +400,7 @@ function reducer(state, action) {
       if (state.xsGate.subStep > 0) {
         return { ...state, xsGate: { ...state.xsGate, subStep: state.xsGate.subStep - 1 } };
       }
-      return { ...state, xsGate: { active: false, resolved: false, subStep: 0, answers: { fatDrain: null, coreProbe: null, lockPanel: null } } };
+      return { ...state, xsGate: { active: false, resolved: false, subStep: 0, answers: { fatDrain: null, coreProbe: null, lockPanel: null, gasPower: null } } };
     }
 
     case "XSGATE_SWITCH_TO_6_1": {

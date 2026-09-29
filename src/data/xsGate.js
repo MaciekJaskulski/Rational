@@ -1,17 +1,26 @@
-// XS add-on subflow — "Step 1a/1b/1c". The XS is RATIONAL's smallest combi
-// oven and skips three accessories the rest of the line offers: the
+// XS add-on subflow — "Step 1a/1b/1c/1d". The XS is RATIONAL's smallest
+// combi oven and skips three accessories the rest of the line offers (the
 // integrated fat drain, an externally attachable core temperature probe, and
-// a lockable control panel. Picking XS in Step 1 walks through one real
-// guided-selling question per feature (not a chat aside) — Zoe explains the
+// a lockable control panel) and, unlike every other size, is electric-only —
+// no gas version exists. Picking XS in Step 1 walks through one real
+// guided-selling question per gap (not a chat aside) — Zoe explains the
 // feature alongside it, but the question, the "you'd need a bigger size for
 // that" advisory, and the final decision all live in the guided flow itself.
 //
-// Fat-drain unavailability on XS is sourced directly from RATIONAL's own fact
-// file; the other two features are flagged from client feedback without a
-// public spec citation, so they're phrased without a link.
+// Fat-drain unavailability and the electric-only spec are both sourced
+// directly from RATIONAL's own materials; the core probe / lockable panel
+// gaps are flagged from client feedback without a public spec citation, so
+// they're phrased without a link.
 export const XS_GATE_FAT_DRAIN_CITATION = {
   label: "RATIONAL — Integrated Fat Drain Fact File",
   url: "https://hcms.rational-online.com/hcms/v1.7/entity/brochure/118270/storage/MDExODI3MC8wL3BkZi1wcmV2aWV3LTE1MHBwaS1wcmludHNoZWV0/download/flyer_fact_file_integrated_fat_drain_icombi_-_english_us.pdf",
+};
+
+// Same source already cited on the XS's own Step 1 option (steps.js) for
+// "electric-only — there's no gas version".
+export const XS_GATE_ELECTRIC_ONLY_CITATION = {
+  label: "RATIONAL iCombi Pro XS Datasheet",
+  url: "https://www.webstaurantstore.com/documents/specsheets/pro_xs.pdf",
 };
 
 export const XS_GATE_INTRO_TEXT = "That's a great choice for a smaller volume, let's make sure it's suitable.";
@@ -54,6 +63,18 @@ export const XS_GATE_SUBQUESTIONS = [
     yesAdvisory:
       "This oven doesn't have a lockable panel so anyone will be able to change its settings, and we advise selecting iCombi 6 1/1 that has that feature.",
     citation: null,
+  },
+  {
+    key: "gasPower",
+    stepLabel: "STEP 1d OF 6 — POWER SUPPLY",
+    shortLabel: "ADD-ONS",
+    question: "Will the oven need to run on gas rather than electricity?",
+    zoeText:
+      "The XS is electric-only — RATIONAL doesn't make a gas version at this size. If your kitchen's install site only has a gas hookup, or you specifically need a gas unit, you'd need to size up.",
+    suggestions: ["Can I add an electric line instead?", "Which sizes offer a gas version?"],
+    yesAdvisory:
+      "This oven is electric-only, so it can't run on gas, and we advise selecting iCombi 6 1/1, which is available in both electric and gas versions.",
+    citation: XS_GATE_ELECTRIC_ONLY_CITATION,
   },
 ];
 

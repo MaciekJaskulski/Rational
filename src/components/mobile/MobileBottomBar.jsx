@@ -33,7 +33,7 @@ export default function MobileBottomBar() {
 
   function handleBack() {
     if (state.xsGate.active) {
-      dispatch({ type: xsGateAskAnyYes ? "XSGATE_RESTART" : "XSGATE_BACK" });
+      dispatch({ type: xsGateAskAnyYes ? "XSGATE_SWITCH_TO_6_1" : "XSGATE_BACK" });
       return;
     }
     dispatch({ type: "BACK" });
@@ -55,7 +55,7 @@ export default function MobileBottomBar() {
       <div className="m-bottom-bar">
         {!isFirstStep && (
           <button type="button" className="m-btn m-btn-back" onClick={handleBack}>
-            {xsGateAskAnyYes ? t("Pick a different oven (recommended)") : t("Back")}
+            {xsGateAskAnyYes ? t("Switch to iCombi 6 1/1") : t("Back")}
           </button>
         )}
         <button type="button" className="m-btn m-btn-primary" onClick={handleContinue} disabled={!continueEnabled}>

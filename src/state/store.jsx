@@ -403,15 +403,22 @@ function reducer(state, action) {
       return { ...state, xsGate: { active: false, resolved: false, subStep: 0, answers: { fatDrain: null, coreProbe: null, lockPanel: null } } };
     }
 
-    case "XSGATE_RESTART": {
-      // "Pick a different oven" — only surfaced once a sub-answer is "yes".
-      // Resets all the way back to Step 1's own meal-volume question so the
-      // user picks a different size themselves through the normal flow.
-      return {
+    case "XSGATE_SWITCH_TO_6_1": {
+      // Triggered either by the "Switch to iCombi 6 1/1" CTA (surfaced once
+      // any sub-answer is "yes") or by tapping the product mention inside an
+      // advisory. Commits the size switch directly and moves straight to
+      // Step 2 — no separate confirmation step.
+      const overrides = { ...state.overrides, gridSize: "6-Grid (1/1 GN)" };
+      const chatByStep = pushChat(state.chatByStep, "meals", {
+        type: "assistant",
+        text: "Switched to iCombi Pro 6-Grid (1/1 GN).",
+      });
+      return advanceToNextStep({
         ...state,
-        answers: { ...state.answers, meals: null },
-        xsGate: { active: false, resolved: false, subStep: 0, answers: { fatDrain: null, coreProbe: null, lockPanel: null } },
-      };
+        overrides,
+        chatByStep,
+        xsGate: { ...state.xsGate, active: false, resolved: true },
+      });
     }
 
     case "SET_MOBILE_TAB":

@@ -22,9 +22,9 @@ export const DE = {
 
   // ---- Step 1 — Meals & Volume ----
   "STEP 1 OF 6 — MEALS & VOLUME": "SCHRITT 1 VON 6 — MAHLZEITEN & VOLUMEN",
-  "How many meals do you prepare per day?": "Wie viele Mahlzeiten bereiten Sie pro Tag zu?",
-  "This is the single biggest factor in sizing your unit — it sets the grid count we'll recommend.":
-    "Das ist der wichtigste Faktor bei der Dimensionierung Ihres Geräts — er bestimmt die Rack-Anzahl, die wir empfehlen.",
+  "Configure your iCombi Pro": "Konfigurieren Sie Ihr iCombi Pro",
+  "Select the oven that seems best suited to the number of meals you prepare per day.":
+    "Wählen Sie das Gerät, das am besten zur Anzahl der Mahlzeiten passt, die Sie pro Tag zubereiten.",
   "Hi, I'm Zoe — I'll help you find the right RATIONAL combi oven for your kitchen. You can click through the questions on the left, or just tell me about your kitchen here and I'll get you started. Either way, I'll explain the 'why' behind every recommendation, and you can ask me anything along the way — specs, installation, warranty, whatever you need.":
     "Hallo, ich bin Zoe — ich helfe Ihnen, den richtigen RATIONAL Combi-Dämpfer für Ihre Küche zu finden. Sie können sich links durch die Fragen klicken oder mir hier einfach von Ihrer Küche erzählen, dann lege ich direkt los. So oder so erkläre ich Ihnen immer das „Warum“ hinter jeder Empfehlung, und Sie können mich jederzeit alles fragen — Spezifikationen, Installation, Garantie, was auch immer Sie brauchen.",
 
@@ -106,7 +106,7 @@ export const DE = {
 
   // ---- Step 2 — Culinary Focus ----
   "STEP 2 OF 6 — CULINARY FOCUS": "SCHRITT 2 VON 6 — KULINARISCHER SCHWERPUNKT",
-  "What's your culinary focus?": "Was ist Ihr kulinarischer Schwerpunkt?",
+  "What will be the primary use of this oven?": "Wofür wird dieses Gerät hauptsächlich genutzt?",
   "The rack insert and holding behavior we recommend follow directly from how you cook.":
     "Der empfohlene Racktyp und das Warmhalteverhalten ergeben sich direkt daraus, wie Sie kochen.",
   "Every menu style asks something different of an oven — let's narrow this down.":
@@ -420,7 +420,7 @@ export const DE = {
     "Eine tolle Wahl für ein kleineres Volumen — lassen Sie uns sicherstellen, dass sie passt.",
   Yes: "Ja",
   No: "Nein",
-  "Pick a different oven (recommended)": "Anderes Gerät wählen (empfohlen)",
+  "Switch to iCombi 6 1/1": "Zum iCombi 6 1/1 wechseln",
 
   "STEP 1a OF 6 — FATTY FOODS": "SCHRITT 1a VON 6 — FETTHALTIGE SPEISEN",
   "Do you cook a lot of fatty meats? Chicken, ribs, duck, etc?": "Kochen Sie viel fetthaltiges Fleisch? Hähnchen, Rippchen, Ente usw.?",

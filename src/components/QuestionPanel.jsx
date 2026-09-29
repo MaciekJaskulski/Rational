@@ -1,6 +1,6 @@
 import { STEPS } from "../data/steps";
 import { useAppState, useAppDispatch, useT } from "../state/store";
-import { XS_GATE_SUBQUESTIONS, xsGateAnyYes } from "../data/xsGate";
+import { XS_GATE_SUBQUESTIONS, xsGateAnyYes, splitAdvisory } from "../data/xsGate";
 import ChatPanel from "./ChatPanel";
 import Citation from "./chat/Citation";
 
@@ -13,13 +13,37 @@ function canContinue(state) {
   return true;
 }
 
+// Step 1's options are the only ones with a gridSize — renders as
+// "iCombi Pro <size> (<meals range>)" instead of just the meals range, so
+// the product itself is visible at a glance. Product/size names are proper
+// nouns (see i18n/dictionary.js) and stay untranslated; only the meals text runs through t().
+function optionTitle(t, opt) {
+  return opt.gridSize ? `iCombi Pro ${opt.gridSize} (${t(opt.label)})` : t(opt.label);
+}
+
+// The advisory paragraph's "iCombi 6 1/1" mention is itself a clickable
+// shortcut for the same switch the CTA below performs.
+function AdvisoryText({ text, onSwitchClick }) {
+  const [before, link, after] = splitAdvisory(text);
+  return (
+    <p>
+      {before}
+      {link && (
+        <button type="button" className="xsgate-advisory-link" onClick={onSwitchClick}>
+          {link}
+        </button>
+      )}
+      {after}
+    </p>
+  );
+}
+
 // XS's add-on subflow ("Step 1a/1b/1c") — three real inserted guided-selling
 // questions, one per feature the XS skips (fat drain / core probe / lockable
 // panel), not a chat aside. Each is a plain yes/no; "yes" shows an inline
-// advisory recommending a bigger size, but never forces the switch — once
-// ANY answer is "yes" the Back button becomes "Pick a different oven", which
-// routes back to Step 1's own meal-volume question so the user picks a
-// different size themselves. Continuing through with XS regardless is fine.
+// advisory recommending iCombi 6 1/1, which the user can commit to either by
+// tapping the product mention in the advisory or the CTA below — both jump
+// straight to Step 2. Continuing through with XS regardless is still fine.
 function XsGatePanel() {
   const state = useAppState();
   const dispatch = useAppDispatch();
@@ -59,15 +83,15 @@ function XsGatePanel() {
 
           {answer === "yes" && (
             <div className="xsgate-advisory">
-              <p>{t(sub.yesAdvisory)}</p>
+              <AdvisoryText text={t(sub.yesAdvisory)} onSwitchClick={() => dispatch({ type: "XSGATE_SWITCH_TO_6_1" })} />
               <Citation citation={sub.citation} />
             </div>
           )}
 
           <div className="step-nav">
             {anyYes ? (
-              <button className="btn btn-back" type="button" onClick={() => dispatch({ type: "XSGATE_RESTART" })}>
-                {t("Pick a different oven (recommended)")}
+              <button className="btn btn-back" type="button" onClick={() => dispatch({ type: "XSGATE_SWITCH_TO_6_1" })}>
+                {t("Switch to iCombi 6 1/1")}
               </button>
             ) : (
               <button className="btn btn-back" type="button" onClick={() => dispatch({ type: "XSGATE_BACK" })}>
@@ -136,7 +160,7 @@ export default function QuestionPanel() {
                     onClick={() => dispatch({ type: "SELECT_OPTION", stepId: step.id, optionId: opt.id })}
                   >
                     <div className="option-text">
-                      <span className="option-title">{t(opt.label)}</span>
+                      <span className="option-title">{optionTitle(t, opt)}</span>
                       <span className="option-sub">{t(opt.sublabel)}</span>
                     </div>
                     <div className={`option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>

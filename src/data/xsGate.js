@@ -60,3 +60,17 @@ export const XS_GATE_SUBQUESTIONS = [
 export function xsGateAnyYes(answers) {
   return Object.values(answers).some((v) => v === "yes");
 }
+
+// The upgrade product mention inside each yesAdvisory string — rendered as a
+// clickable link (see splitAdvisory below) so tapping it commits the switch
+// directly instead of only being a suggestion in prose.
+export const XS_GATE_UPGRADE_LABEL = "iCombi 6 1/1";
+
+// Splits a (translated) advisory string around XS_GATE_UPGRADE_LABEL so a
+// caller can render [before, <link>, after]. Falls back to [text, null, ""]
+// if the phrase isn't present, so callers can render plain text safely.
+export function splitAdvisory(text) {
+  const idx = text.indexOf(XS_GATE_UPGRADE_LABEL);
+  if (idx === -1) return [text, null, ""];
+  return [text.slice(0, idx), XS_GATE_UPGRADE_LABEL, text.slice(idx + XS_GATE_UPGRADE_LABEL.length)];
+}

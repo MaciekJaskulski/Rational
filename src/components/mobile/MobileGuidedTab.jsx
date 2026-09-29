@@ -1,11 +1,34 @@
 import { STEPS } from "../../data/steps";
 import { useAppState, useAppDispatch, useRecommendation, useT } from "../../state/store";
 import { gridSizeOptions, standOptions, rackOptions, hoodOptions } from "../../data/engine";
-import { XS_GATE_SUBQUESTIONS } from "../../data/xsGate";
+import { XS_GATE_SUBQUESTIONS, splitAdvisory } from "../../data/xsGate";
 import Citation from "../chat/Citation";
 
+// Step 1's options are the only ones with a gridSize — see the matching
+// helper in desktop's QuestionPanel.jsx for the full rationale.
+function optionTitle(t, opt) {
+  return opt.gridSize ? `iCombi Pro ${opt.gridSize} (${t(opt.label)})` : t(opt.label);
+}
+
+// The advisory paragraph's "iCombi 6 1/1" mention is itself a clickable
+// shortcut for the same switch the bottom-bar CTA performs.
+function AdvisoryText({ text, onSwitchClick }) {
+  const [before, link, after] = splitAdvisory(text);
+  return (
+    <p style={{ margin: "0 0 4px" }}>
+      {before}
+      {link && (
+        <button type="button" className="m-xsgate-advisory-link" onClick={onSwitchClick}>
+          {link}
+        </button>
+      )}
+      {after}
+    </p>
+  );
+}
+
 // Mirrors desktop's XsGatePanel — same 3-question subflow, mobile card
-// styling. The CTA row (Back/Continue vs. "Pick a different oven") lives in
+// styling. The CTA row (Back/Continue vs. "Switch to iCombi 6 1/1") lives in
 // MobileBottomBar, same as every other guided step.
 function XsGateQuestion() {
   const state = useAppState();
@@ -41,7 +64,7 @@ function XsGateQuestion() {
 
       {answer === "yes" && (
         <div className="m-xsgate-advisory">
-          <p style={{ margin: "0 0 4px" }}>{t(sub.yesAdvisory)}</p>
+          <AdvisoryText text={t(sub.yesAdvisory)} onSwitchClick={() => dispatch({ type: "XSGATE_SWITCH_TO_6_1" })} />
           <Citation citation={sub.citation} />
         </div>
       )}
@@ -75,7 +98,7 @@ function StepQuestion() {
                 onClick={() => dispatch({ type: "SELECT_OPTION", stepId: step.id, optionId: opt.id })}
               >
                 <div className="m-option-text">
-                  <span className="m-option-title">{t(opt.label)}</span>
+                  <span className="m-option-title">{optionTitle(t, opt)}</span>
                   <span className="m-option-sub">{t(opt.sublabel)}</span>
                 </div>
                 <div className={`m-option-radio ${selected ? "checked" : ""}`}>{selected ? "✓" : ""}</div>

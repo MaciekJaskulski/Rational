@@ -8,9 +8,9 @@ export const STEPS = [
     key: "meals",
     stepLabel: "STEP 1 OF 6 — MEALS & VOLUME",
     shortLabel: "MEALS & VOLUME",
-    title: "How many meals do you prepare per day?",
+    title: "Configure your iCombi Pro",
     subtitle:
-      "This is the single biggest factor in sizing your unit — it sets the grid count we'll recommend.",
+      "Select the oven that seems best suited to the number of meals you prepare per day.",
     transition:
       "Hi, I'm Zoe — I'll help you find the right RATIONAL combi oven for your kitchen. You can click through the questions on the left, or just tell me about your kitchen here and I'll get you started. Either way, I'll explain the 'why' behind every recommendation, and you can ask me anything along the way — specs, installation, warranty, whatever you need.",
     options: [
@@ -112,7 +112,7 @@ export const STEPS = [
     key: "focus",
     stepLabel: "STEP 2 OF 6 — CULINARY FOCUS",
     shortLabel: "CULINARY FOCUS",
-    title: "What's your culinary focus?",
+    title: "What will be the primary use of this oven?",
     subtitle: "The rack insert and holding behavior we recommend follow directly from how you cook.",
     transition: "Every menu style asks something different of an oven — let's narrow this down.",
     options: [

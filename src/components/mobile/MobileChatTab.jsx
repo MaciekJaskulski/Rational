@@ -50,7 +50,7 @@ function useConversationBlocks() {
           { q: t("No"), action: "xsgate:answer:no" },
         ];
         if (xsGateAnyYes(state.xsGate.answers)) {
-          suggestions.push({ q: t("Pick a different oven (recommended)"), action: "xsgate:restart" });
+          suggestions.push({ q: t("Switch to iCombi 6 1/1"), action: "xsgate:switch61" });
         }
         synthetic = { text: t(sub.question), suggestions };
       }
@@ -286,8 +286,8 @@ export default function MobileChatTab() {
       return;
     }
     if (kind === "xsgate") {
-      if (a === "restart") {
-        dispatch({ type: "XSGATE_RESTART" });
+      if (a === "switch61") {
+        dispatch({ type: "XSGATE_SWITCH_TO_6_1" });
         return;
       }
       dispatch({ type: "XSGATE_ANSWER_SUB", value: b });

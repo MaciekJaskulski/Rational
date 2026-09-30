@@ -61,8 +61,8 @@ export default function LeadGenModal({ open, onClose }) {
             <div className="leadgen-description">{description}</div>
 
             <label className="leadgen-field">
-              <span>{t("First name")}</span>
-              <input required value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder={state.lang === "de" ? "Max" : "Jamie"} />
+              <span>{t("Full name")}</span>
+              <input required value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder={state.lang === "de" ? "Max Mustermann" : "Jamie Rivera"} />
             </label>
             <label className="leadgen-field">
               <span>{t("Company name")}</span>

@@ -486,7 +486,7 @@ export const DE = {
   "Source:": "Quelle:",
 
   // ---- LeadGenModal ----
-  "First name": "Vorname",
+  "Full name": "Vollständiger Name",
   "Company name": "Firmenname",
   Email: "E-Mail",
   "Phone number": "Telefonnummer",

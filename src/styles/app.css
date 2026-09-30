@@ -615,6 +615,10 @@ button {
 .product-preview {
   flex-shrink: 1;
   min-width: 0;
+  /* Pin it to the row's right edge regardless of how narrow the panel next
+     to it is (e.g. the "no-chat" panel when Zoe is off), instead of sitting
+     right up against the panel with a lot of dead space further right. */
+  margin-left: auto;
 }
 
 /* One shared glass panel wraps the product AND its addon tiles — matches
